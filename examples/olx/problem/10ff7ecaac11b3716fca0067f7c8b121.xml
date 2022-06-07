@@ -1,0 +1,21 @@
+<problem display_name="Multiple choice question">
+ <choiceresponse>
+  <label>
+   What is the answer to Life, the Universe, and Everything?
+  </label>
+  <checkboxgroup>
+   <choice correct="true" name="0">
+    6 x 7
+   </choice>
+   <choice correct="false" name="1">
+    666
+   </choice>
+   <choice correct="false" name="2">
+    0
+   </choice>
+   <choice correct="true" name="3">
+    42
+   </choice>
+  </checkboxgroup>
+ </choiceresponse>
+</problem>
