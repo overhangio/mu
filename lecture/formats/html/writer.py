@@ -6,6 +6,7 @@ from bs4.element import Tag
 from lecture import units
 from lecture.formats.base.writer import Writer as BaseWriter
 from lecture.utils import youtube
+from .common import TYPE_ATTR
 
 
 def dump(course: units.Course, path: str) -> None:
@@ -46,16 +47,18 @@ class Writer(BaseWriter):
         self.on_unit(unit)
 
         # Write question
-        answers_html = Tag(name="ul")
-        question_html = Tag(name="li")
+        section_html = Tag(name="section", attrs={TYPE_ATTR: "mcq"})
+        question_html = Tag(name="p")
         question_html.string = unit.question
-        answers_html.append(question_html)
+        section_html.append(question_html)
+        answers_html = Tag(name="ul")
         # Write answers
         for answer, is_correct in unit.answers:
             answer_html = Tag(name="li")
             answer_html.string = f"{'✅' if is_correct else '❌'} {answer}"
             answers_html.append(answer_html)
-        self.append_to_body(answers_html)
+        section_html.append(answers_html)
+        self.append_to_body(section_html)
 
     def on_video(self, unit: units.Video) -> None:
         """
@@ -64,6 +67,7 @@ class Writer(BaseWriter):
         TODO
         """
         self.on_unit(unit)
+        section_html = Tag(name="section", attrs={TYPE_ATTR: "video"})
         # TODO handle transcripts
         video_tag = Tag(name="video", attrs={"controls": None})
         youtube_video_tag = None
@@ -88,7 +92,8 @@ class Writer(BaseWriter):
                             attrs={"src": source, "type": f"video/{video_type}"},
                         )
                     )
-        self.append_to_body(youtube_video_tag or video_tag)
+        section_html.append(youtube_video_tag or video_tag)
+        self.append_to_body(section_html)
 
     def on_rawhtml(self, unit: units.RawHtml) -> None:
         self.append_to_body(BeautifulSoup(unit.contents, "html.parser"))

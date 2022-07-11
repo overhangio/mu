@@ -27,6 +27,7 @@ class Writer(BaseWriter):
         self.unit_xml: t.Dict[units.Unit, Tag] = {}
 
     def on_unit(self, unit: units.Unit) -> None:
+        # TODO we should complain about non-header units which are not level 5
         self.process_top_level_unit(unit)
 
     def on_course(self, unit: units.Course) -> None:
@@ -107,6 +108,8 @@ class Writer(BaseWriter):
         https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/components/video-components.html
         """
         video_xml = self.process_unit(unit, "video")
+        # We need to define an empty youtube url; otherwise the default video with Anant is picked up.
+        video_xml.attrs["youtube_id_1_0"] = ""
         for source in unit.sources:
             if youtube_video_id := get_youtube_video_id(source):
                 video_xml.attrs["youtube_id_1_0"] = youtube_video_id

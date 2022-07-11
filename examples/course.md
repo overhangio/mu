@@ -6,9 +6,13 @@
 
 #### Syllabus
 
+::: {lecture-type=video}
+
 ##### Video
 
 ![](https://s3.amazonaws.com/edx-course-videos/edx-edx101/EDXSPCPJSP13-H010000_100.mp4)
+
+:::
 
 ##### Some html content
 
@@ -25,10 +29,15 @@ Raw code:
 
 #### Problems
 
-##### Multiple choice question
+::: {lecture-type=mcq}
 
-* What is the answer to Life, the Universe, and Everything?
+#### Multiple choice question
+
+What is the answer to Life, the Universe, and Everything?
+
 * ✅ 6 x 7
 * ❌ 666
 * ❌ 0
 * ✅ 42
+
+:::

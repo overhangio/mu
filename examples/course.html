@@ -34,10 +34,12 @@ iframe {
   <h5>
    Video
   </h5>
-  <video controls>
-   <source src="https://s3.amazonaws.com/edx-course-videos/edx-edx101/EDXSPCPJSP13-H010000_100.mp4" type="video/mp4">
-   </source>
-  </video>
+  <section data-lecture-type="video">
+   <video controls>
+    <source src="https://s3.amazonaws.com/edx-course-videos/edx-edx101/EDXSPCPJSP13-H010000_100.mp4" type="video/mp4">
+    </source>
+   </video>
+  </section>
   <h5>
    Some html content
   </h5>
@@ -62,25 +64,27 @@ base64.decodebytes(b'UmFjbGV0dGUgY2hlZXNlIGlzIHRoZSBiZXN0')</code></pre>
   <h4>
    Problems
   </h4>
-  <h5>
-   Multiple choice question
-  </h5>
-  <ul>
-   <li>
+  <section data-lecture-type="mcq" id="multiple-choice-question">
+   <h4>
+    Multiple choice question
+   </h4>
+   <p>
     What is the answer to Life, the Universe, and Everything?
-   </li>
-   <li>
-    ✅ 6 x 7
-   </li>
-   <li>
-    ❌ 666
-   </li>
-   <li>
-    ❌ 0
-   </li>
-   <li>
-    ✅ 42
-   </li>
-  </ul>
+   </p>
+   <ul>
+    <li>
+     ✅ 6 x 7
+    </li>
+    <li>
+     ❌ 666
+    </li>
+    <li>
+     ❌ 0
+    </li>
+    <li>
+     ✅ 42
+    </li>
+   </ul>
+  </section>
  </body>
 </html>

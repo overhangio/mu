@@ -67,16 +67,19 @@ class HtmlReaderTests(unittest.TestCase):
             read_bs(
                 """
 <h1>My amazing video course</h1>
-<h2>Video 1</h2>
-<video>
-    <source src="https://youtu.be/dQw4w9WgXcQ">
-    <source src="/media/cc0-videos/flower.mp4">
-</video>"""
+<section data-lecture-type="video">
+    <h2>Video 1</h2>
+    <video>
+        <source src="https://youtu.be/dQw4w9WgXcQ">
+        <source src="/media/cc0-videos/flower.mp4">
+    </video>
+</section>
+"""
             ).h1
         )
         course = reader.read()
-        self.assertEqual("Video 1", course.children[0].title)
-        video = course.children[0].children[0]
+        video = course.children[0]
+        self.assertEqual("Video 1", video.title)
         assert isinstance(video, units.Video)
         self.assertEqual(
             ["https://youtu.be/dQw4w9WgXcQ", "/media/cc0-videos/flower.mp4"],
@@ -88,12 +91,14 @@ class HtmlReaderTests(unittest.TestCase):
             read_bs(
                 """
 <h1>My amazing video course</h1>
-<h2>Video 1</h2>
-<video src="/media/cc0-videos/flower.mp4"></video>"""
+<section data-lecture-type="video">
+    <h2>Video 1</h2>
+    <video src="/media/cc0-videos/flower.mp4"></video>
+</section>"""
             ).h1
         )
         course = reader.read()
-        video = course.children[0].children[0]
+        video = course.children[0]
         assert isinstance(video, units.Video)
         self.assertEqual(["/media/cc0-videos/flower.mp4"], video.sources)
 
@@ -102,14 +107,16 @@ class HtmlReaderTests(unittest.TestCase):
             read_bs(
                 """
 <h1>My amazing video course</h1>
-<h2>Video 1</h2>
-<video src="/media/cc0-videos/flower.mp4">
-    <source src="/media/cc0-videos/flower.mp4">
-</video>"""
+<section data-lecture-type="video">
+    <h2>Video 1</h2>
+    <video src="/media/cc0-videos/flower.mp4">
+        <source src="/media/cc0-videos/flower.mp4">
+    </video>
+</section>"""
             ).h1
         )
         course = reader.read()
-        video = course.children[0].children[0]
+        video = course.children[0]
         assert isinstance(video, units.Video)
         self.assertEqual(["/media/cc0-videos/flower.mp4"], video.sources)
 
@@ -118,7 +125,10 @@ class HtmlReaderTests(unittest.TestCase):
             read_bs(
                 """
 <h1>My amazing youtube video course</h1>
-<iframe src='https://www.youtube.com/embed/dQw4w9WgXcQ'></iframe>"""
+<section data-lecture-type="video">
+    <iframe src='https://www.youtube.com/embed/dQw4w9WgXcQ'></iframe>
+</section>
+"""
             ).h1
         )
         unit = list(reader.parse())[0]
@@ -146,7 +156,7 @@ class HtmlReaderTests(unittest.TestCase):
             child.contents,
         )
 
-    def test_html_paragraphs_with_video(self) -> None:
+    def test_multi_raw_html_units(self) -> None:
         reader = Reader(
             read_bs(
                 """
@@ -159,20 +169,16 @@ class HtmlReaderTests(unittest.TestCase):
             ).h1
         )
         course = list(reader.parse())[0]
-        self.assertEqual(3, len(course.children))
-        child0 = course.children[0]
-        child1 = course.children[1]
-        child2 = course.children[2]
-        assert isinstance(child0, units.RawHtml)
-        assert isinstance(child1, units.Video)
-        assert isinstance(child2, units.RawHtml)
+        self.assertEqual(1, len(course.children))
+        child = course.children[0]
+        assert isinstance(child, units.RawHtml)
         self.assertEqual(
             """<p>Paragraph 1 <img src="https://www.google.com/images/logo.png"/></p>
-<p>Paragraph 2</p>""",
-            child0.contents,
+<p>Paragraph 2</p>
+<video src="foo.mp4"></video>
+<p>Paragraph 3</p>""",
+            child.contents,
         )
-        self.assertEqual(["foo.mp4"], child1.sources)
-        self.assertEqual("""<p>Paragraph 3</p>""", child2.contents)
 
 
 class HtmlWriterTests(unittest.TestCase):

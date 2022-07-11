@@ -8,6 +8,7 @@ from lecture import units
 from lecture.exceptions import LectureError
 from lecture.formats.base.reader import Reader as BaseReader
 from lecture.utils import youtube
+from .common import TYPE_ATTR
 
 
 def load(path: str) -> units.Course:
@@ -50,6 +51,15 @@ class Reader(BaseReader):
                     # subsequent items belong to it.
                     break
             yield unit
+
+    def on_section(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
+        unit_type = unit_html.attrs.get(TYPE_ATTR)
+        if unit_type == "mcq":
+            # Multiple choice question
+            yield from self.process_mcq(unit_html)
+        elif unit_type == "video":
+            yield from self.process_video(unit_html)
+        # TODO raise error when type is unrecognized
 
     def on_header(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
         # Create unit
@@ -94,22 +104,38 @@ class Reader(BaseReader):
     on_div = _on_html
     on_p = _on_html
     on_pre = _on_html
+    on_video = _on_html
 
-    def on_ul(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
+    def process_mcq(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
         """
         <ul> tags may contain multiple choice questions. In such cases, the first <li>
         is the question and each subsequent <li> element starts with either ✅ or ❌.
         """
+        title = ""
+        if title_html := self.find_title(unit_html):
+            title = title_html.string
+
         question: t.Optional[str] = None
         answers_are_valid = True
         right = "✅"
         wrong = "❌"
         answers = []
-        for li_html in unit_html.find_all("li"):
+        question_html = unit_html.find("p")
+        if question_html is None:
+            # TODO better error management
+            raise LectureError(
+                "Missing <p> question element in multiple choice question"
+            )
+        question = question_html.string.strip()
+        if question is None:
+            raise LectureError("Missing question element in multiple choice question")
+        ul_html = unit_html.find("ul")
+        if ul_html is None:
+            # TODO better error management
+            raise LectureError("Missing <ul> element in multiple choice question")
+        for li_html in ul_html.find_all("li"):
             answer = li_html.string.strip()
-            if question is None:
-                question = answer
-            elif answer.startswith(right):
+            if answer.startswith(right):
                 answers.append((answer[1:].strip(), True))
             elif answer.startswith(wrong):
                 answers.append((answer[1:].strip(), False))
@@ -117,26 +143,61 @@ class Reader(BaseReader):
                 # Not a multiple choice question
                 answers_are_valid = False
                 break
-        if question is not None and answers_are_valid:
+        if answers_are_valid:
             # Generate MCQ
             # Note that the question is parsed from the previous <p>
             yield units.MultipleChoiceQuestion(
+                title=title,
                 question=question,
                 answers=answers,
             )
-            return
+        else:
+            # Process as a normal html element
+            yield from self._on_html(unit_html)
 
-        # Process as a normal html element
-        yield from self._on_html(unit_html)
+    def process_video(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
+        """
+        https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
+        """
+        title = ""
+        if title_html := self.find_title(unit_html):
+            title = title_html.string
 
-    def on_iframe(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
-        """
-        We only parse video units.
-        TODO parse arbitrary html/iframe content?
-        """
-        src = unit_html.attrs.get("src")
-        if youtube_video_id := youtube.get_embed_video_id(src):
-            yield units.Video(sources=[youtube.get_watch_url(youtube_video_id)])
+        video_html = unit_html.find("video")
+        iframe_html = unit_html.find("iframe")
+        if video_html is None and iframe_html is None:
+            # TODO better context in error message
+            raise LectureError(
+                "Missing <video> or <iframe> element in unit labelled as video"
+            )
+
+        if video_html:
+            sources: t.List[str] = []
+            if src := video_html.attrs.get("src"):
+                sources.append(src)
+            for source_html in video_html.find_all("source"):
+                if source := source_html.attrs.get("src"):
+                    if source not in sources:
+                        sources.append(source)
+            yield units.Video(title=title, sources=sources)
+        else:
+            src = iframe_html.attrs.get("src")
+            if youtube_video_id := youtube.get_embed_video_id(src):
+                yield units.Video(
+                    title=title, sources=[youtube.get_watch_url(youtube_video_id)]
+                )
+
+    def find_title(self, unit_html: BeautifulSoup) -> t.Optional[BeautifulSoup]:
+        return unit_html.find(
+            [
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+            ]
+        )
 
     on_h1 = on_header
     on_h2 = on_header
@@ -144,19 +205,6 @@ class Reader(BaseReader):
     on_h4 = on_header
     on_h5 = on_header
     on_h6 = on_header
-
-    def on_video(self, video_html: BeautifulSoup) -> t.Iterable[units.Unit]:
-        """
-        https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
-        """
-        sources: t.List[str] = []
-        if src := video_html.attrs.get("src"):
-            sources.append(src)
-        for source_html in video_html.find_all("source"):
-            if source := source_html.attrs.get("src"):
-                if source not in sources:
-                    sources.append(source)
-        yield units.Video(sources=sources)
 
 
 class DocumentReader(Reader):
