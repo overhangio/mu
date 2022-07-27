@@ -63,13 +63,10 @@ class Writer(BaseWriter):
         https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/problem-xml/multiple_choice.html#multiple-choice-problem-olx-reference
         """
         problem_xml = self.process_unit(unit, "problem")
-
+        response_xml = Tag(name="choiceresponse")
         question_xml = Tag(name="label")
         question_xml.string = unit.question
-
-        response_xml = Tag(name="choiceresponse")
         response_xml.append(question_xml)
-
         responsegroup_xml = Tag(name="checkboxgroup")
         for index, (answer, is_correct) in enumerate(unit.answers):
             answer_xml = Tag(
@@ -80,6 +77,24 @@ class Writer(BaseWriter):
             responsegroup_xml.append(answer_xml)
 
         response_xml.append(responsegroup_xml)
+        problem_xml.append(response_xml)
+
+    def on_freetextquestion(self, unit: units.MultipleChoiceQuestion) -> None:
+        """
+        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/problem-xml/text_input.html
+        """
+        problem_xml = self.process_unit(unit, "problem")
+        response_xml = Tag(name="stringresponse")
+        response_xml.attrs["answer"] = unit.answers[0][0]
+        question_xml = Tag(name="label")
+        question_xml.string = unit.question
+        response_xml.append(question_xml)
+        for answer, _ in unit.answers[1:]:
+            answer_xml = Tag(
+                name="additional_answer",
+                attrs={"answer": answer},
+            )
+            response_xml.append(answer_xml)
         problem_xml.append(response_xml)
 
     def on_rawhtml(self, unit: units.RawHtml) -> None:

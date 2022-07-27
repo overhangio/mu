@@ -40,14 +40,11 @@ For each unit type, we indicate whether reading from (R) and writing to (W) the 
 
 Unit type / Format | OLX | HTML/Markdown
 ---|---|---
-Top-level course | R+W | R+W
-Title | R+W | R+W
-Multiple choice question | R+W | R+W
 Video | R+W | R+W
+Free text question | R+W | R+W
 Multiple choice question | R+W | R+W
 Raw HTML | R+W | R+W
-iframe |  |
-more to come... |  |
+more to come! |  |
 
 ### Notes and known limitations
 

@@ -41,3 +41,18 @@ What is the answer to Life, the Universe, and Everything?
 * ✅ 42
 
 :::
+
+::: {lecture-type=ftq}
+
+#### Free text question
+
+How many legs does a healthy snake have?
+
+<!-- All accepted answers are listed below -->
+
+* None
+* Zero
+* 0
+
+:::
+

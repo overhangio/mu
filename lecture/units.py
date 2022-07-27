@@ -34,6 +34,43 @@ class Course(Unit):
     """
 
 
+class MultipleChoiceQuestion(Unit):
+    def __init__(
+        self,
+        attributes: t.Optional[t.Dict[str, str]] = None,
+        title: str = "",
+        question: str = "",
+        answers: t.Optional[t.List[t.Tuple[str, bool]]] = None,
+    ):
+        super().__init__(attributes=attributes, title=title)
+        self.question = question
+        answers = answers or []
+        self.answers = [(answer.strip(), is_correct) for answer, is_correct in answers]
+
+
+class FreeTextQuestion(MultipleChoiceQuestion):
+    """
+    A question for which the student is presented with a free text field to answer.
+
+    Multiple answers are usually accepted.
+    """
+
+    def __init__(
+        self,
+        attributes: t.Optional[t.Dict[str, str]] = None,
+        title: str = "",
+        question: str = "",
+        answers: t.Optional[t.List[str]] = None,
+    ):
+        answers = answers or []
+        super().__init__(
+            attributes=attributes,
+            title=title,
+            question=question,
+            answers=[(answer, True) for answer in answers],
+        )
+
+
 class RawHtml(Unit):
     def __init__(
         self,
@@ -47,20 +84,6 @@ class RawHtml(Unit):
     def concatenate(self, unit: "RawHtml") -> "RawHtml":
         self.contents += "\n" + unit.contents
         return self
-
-
-class MultipleChoiceQuestion(Unit):
-    def __init__(
-        self,
-        attributes: t.Optional[t.Dict[str, str]] = None,
-        title: str = "",
-        question: str = "",
-        answers: t.Optional[t.List[t.Tuple[str, bool]]] = None,
-    ):
-        super().__init__(attributes=attributes, title=title)
-        self.question = question
-        answers = answers or []
-        self.answers = [(answer.strip(), is_correct) for answer, is_correct in answers]
 
 
 class Video(Unit):

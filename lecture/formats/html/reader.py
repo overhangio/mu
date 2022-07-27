@@ -59,6 +59,9 @@ class Reader(BaseReader):
             yield from self.process_mcq(unit_html)
         elif unit_type == "video":
             yield from self.process_video(unit_html)
+        elif unit_type == "ftq":
+            # Free text question
+            yield from self.process_ftq(unit_html)
         # TODO raise error when type is unrecognized
 
     def on_header(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
@@ -111,14 +114,43 @@ class Reader(BaseReader):
         <ul> tags may contain multiple choice questions. In such cases, the first <li>
         is the question and each subsequent <li> element starts with either ✅ or ❌.
         """
+        title, question, answers = self.get_question_answers(unit_html)
+        right = "✅"
+        wrong = "❌"
+        evaluated_answers = []
+        for answer in answers:
+            is_correct = False
+            if answer.startswith(right):
+                is_correct = True
+            elif answer.startswith(wrong):
+                is_correct = False
+            else:
+                # Not a multiple choice question
+                raise LectureError(
+                    f"Incorrectly formatted answer in multiple choice question: "
+                    f"should start with either {right} or {wrong}"
+                )
+            evaluated_answers.append((answer[1:].strip(), is_correct))
+
+        # Generate MCQ
+        yield units.MultipleChoiceQuestion(
+            title=title,
+            question=question,
+            answers=evaluated_answers,
+        )
+
+    def process_ftq(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
+        title, question, answers = self.get_question_answers(unit_html)
+        yield units.FreeTextQuestion(title=title, question=question, answers=answers)
+
+    def get_question_answers(
+        self, unit_html: BeautifulSoup
+    ) -> t.Tuple[str, str, t.List[str]]:
         title = ""
         if title_html := self.find_title(unit_html):
             title = title_html.string
 
         question: t.Optional[str] = None
-        answers_are_valid = True
-        right = "✅"
-        wrong = "❌"
         answers = []
         question_html = unit_html.find("p")
         if question_html is None:
@@ -135,25 +167,9 @@ class Reader(BaseReader):
             raise LectureError("Missing <ul> element in multiple choice question")
         for li_html in ul_html.find_all("li"):
             answer = li_html.string.strip()
-            if answer.startswith(right):
-                answers.append((answer[1:].strip(), True))
-            elif answer.startswith(wrong):
-                answers.append((answer[1:].strip(), False))
-            else:
-                # Not a multiple choice question
-                answers_are_valid = False
-                break
-        if answers_are_valid:
-            # Generate MCQ
-            # Note that the question is parsed from the previous <p>
-            yield units.MultipleChoiceQuestion(
-                title=title,
-                question=question,
-                answers=answers,
-            )
-        else:
-            # Process as a normal html element
-            yield from self._on_html(unit_html)
+            answers.append(answer.strip())
+
+        return title, question, answers
 
     def process_video(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
         """

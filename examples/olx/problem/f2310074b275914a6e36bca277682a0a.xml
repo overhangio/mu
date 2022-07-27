@@ -1,0 +1,11 @@
+<problem display_name="Free text question">
+ <stringresponse answer="None">
+  <label>
+   How many legs does an healthy snake have?
+  </label>
+  <additional_answer answer="Zero">
+  </additional_answer>
+  <additional_answer answer="0">
+  </additional_answer>
+ </stringresponse>
+</problem>

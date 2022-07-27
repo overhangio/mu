@@ -63,22 +63,36 @@ class Reader(BaseReader):
     def on_problem(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
         """
         https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/problem-xml/checkbox.html
+        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/problem-xml/text_input.html
         """
         # Parse question
         question_xml = unit_xml.find("label")
         question = question_xml.string if question_xml else ""
 
-        # Parse answers
-        answers = [
-            (answer_xml.string, answer_xml.attrs.get("correct", "").lower() == "true")
-            for answer_xml in unit_xml.find_all("choice")
-        ]
-
-        yield units.MultipleChoiceQuestion(
-            title=unit_xml.attrs.get("display_name", ""),
-            question=question,
-            answers=answers,
-        )
+        if response_xml := unit_xml.find("choiceresponse"):
+            # Multiple choice question
+            yield units.MultipleChoiceQuestion(
+                title=unit_xml.attrs.get("display_name", ""),
+                question=question,
+                answers=[
+                (
+                    answer_xml.string,
+                    answer_xml.attrs.get("correct", "").lower() == "true",
+                )
+                for answer_xml in response_xml.find_all("choice")
+            ],
+            )
+        elif response_xml := unit_xml.find("stringresponse"):
+            # Free text question
+            ftq_answers = []
+            ftq_answers.append(response_xml.attrs["answer"])
+            for answer_xml in response_xml.find_all("additional_answer"):
+                ftq_answers.append(answer_xml.attrs["answer"])
+            yield units.FreeTextQuestion(
+                title=unit_xml.attrs.get("display_name", ""),
+                question=question,
+                answers=ftq_answers,
+            )
 
     def on_sequential(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
         yield units.Unit(
