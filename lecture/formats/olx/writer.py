@@ -38,7 +38,8 @@ class Writer(BaseWriter):
             "url_name": get_url_name(unit),
         }
         for name in ["org", "course", "url_name"]:
-            # TODO should we also copy all the olx-* attributes? (I think we should)
+            # TODO IMPORTANT should we also copy all the olx-* attributes? (I think we should)
+            # TODO IMPORTANT should we also copy the attributes when we convert from olx?
             if olx_attr := unit.attributes.get(f"olx-{name}"):
                 attributes[name] = olx_attr
             else:

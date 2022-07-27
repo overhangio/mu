@@ -31,43 +31,53 @@ class Writer(BaseWriter):
     def append_to_body(self, tag: Tag) -> None:
         self.document.html.body.append(tag)
 
-    def on_unit(self, unit: units.Unit) -> None:
+    def get_header(self, unit: units.Unit) -> Tag:
+        tag = Tag(
+            name=f"h{unit.depth + 1}",
+            attrs={f"data-{k}": v for k, v in unit.attributes.items()},
+        )
         if title := unit.title:
-            tag = Tag(
-                name=f"h{unit.depth + 1}",
-                attrs={f"data-{k}": v for k, v in unit.attributes.items()},
-            )
             tag.string = title
-            self.append_to_body(tag)
+        return tag
+
+    def on_unit(self, unit: units.Unit) -> None:
+        self.append_to_body(self.get_header(unit))
 
     def on_course(self, unit: units.Course) -> None:
-        self.on_unit(unit)
+        self.append_to_body(self.get_header(unit))
 
     def on_multiplechoicequestion(self, unit: units.MultipleChoiceQuestion) -> None:
-        self.on_unit(unit)
+        section_html = Tag(name="section", attrs={TYPE_ATTR: "mcq"})
+
+        # Write title
+        section_html.append(self.get_header(unit))
 
         # Write question
-        section_html = Tag(name="section", attrs={TYPE_ATTR: "mcq"})
         question_html = Tag(name="p")
         question_html.string = unit.question
         section_html.append(question_html)
         answers_html = Tag(name="ul")
+
         # Write answers
         for answer, is_correct in unit.answers:
             answer_html = Tag(name="li")
             answer_html.string = f"{'✅' if is_correct else '❌'} {answer}"
             answers_html.append(answer_html)
         section_html.append(answers_html)
+
         self.append_to_body(section_html)
 
     def on_video(self, unit: units.Video) -> None:
         """
         We parse the video sources. If one is youtube, we include a youtube iframe.
         Else, we include a <video> element.
-        TODO
+        TODO cleaner code?
         """
-        self.on_unit(unit)
         section_html = Tag(name="section", attrs={TYPE_ATTR: "video"})
+
+        # Write title
+        section_html.append(self.get_header(unit))
+
         # TODO handle transcripts
         video_tag = Tag(name="video", attrs={"controls": None})
         youtube_video_tag = None
