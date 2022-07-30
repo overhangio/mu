@@ -75,6 +75,10 @@ Re-generate course samples:
 
     make examples
 
+Upgrade pinned requirements:
+
+    make upgrade-requirements
+
 ### How can we add a new type of course unit?
 
 Want to add a new type of content to your course? Here's a general approach:
