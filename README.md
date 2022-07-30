@@ -54,6 +54,37 @@ more to come! |  |
 
 * Multiple choice questions are always rendered as checkboxes, and not as single-choice questions.
 
+## Contributing
+
+### Setting up a development environment
+
+Install development requirements:
+
+    pip install -r requirements/dev.txt
+    pip install -e .
+
+Run tests:
+
+    make test
+
+Reformat your code with [black](https://black.readthedocs.io/en/stable/):
+
+    make format
+
+Re-generate course samples:
+
+    make examples
+
+### How can we add a new type of course unit?
+
+Want to add a new type of content to your course? Here's a general approach:
+
+1. Start by creating a new type of unit in the [lecture/units.py](https://github.com/overhangio/lecture/blob/main/lecture/units.py) module.
+2. Add such a unit to the [examples/course.md](https://github.com/overhangio/lecture/blob/main/examples/course.md) sample file, using your desired syntax.
+3. Implement the corresponding HTML reader in the [lecture/formats/html/reader.py](https://github.com/overhangio/lecture/blob/main/lecture/formats/html/reader.py) module. You should draw your inspiration from the `Reader.on_section` method. You are strongly encouraged to add at least one unit test to [tests/test_html.py](https://github.com/overhangio/lecture/blob/main/lecture/tests/test_html).
+4. Now, implement the HTML writer in the [lecture/formats/html/writer.py](https://github.com/overhangio/lecture/blob/main/lecture/formats/html/reader.py) module. This should be as simple as creating a new `Writer.on_yournewunitname` method. Add a unit test. Verify that your writer is generating the right HTML output by running `make example-html`.
+5. Implement the corresponding OLX reader and writer in [lecture/formats/olx/writer.py](https://github.com/overhangio/lecture/blob/main/lecture/formats/olx/reader.py) and [lecture/formats/olx/writer.py](https://github.com/overhangio/lecture/blob/main/lecture/formats/olx/reader.py). Check that the OLX course is correctly generated when you run `make example-olx`.
+
 ## License
 
 This work is licensed under the terms of the [GNU Affero General Public License (AGPL)](https://github.com/overhangio/lecture/blob/master/LICENSE.txt).

@@ -13,7 +13,7 @@ upgrade-requirements: ## Upgrade requirements files
 test: test-lint test-unit test-types test-format ## Run all tests
 
 test-lint: ## Run linting tests
-	pylint --errors-only --enable=unused-import,unused-argument lecture tests
+	pylint --errors-only --enable=unused-import,unused-argument lecture tests setup.py
 
 test-unit: ## Run unit tests
 	python -m unittest discover tests
@@ -25,7 +25,7 @@ test-format: ## Check code formatting
 	black --check lecture tests
 
 format: ## Auto-format code with black
-	black lecture tests
+	black lecture tests setup.py
 
 isort: ## Sort imports. This target is not mandatory because the output may be incompatible with black formatting. Provided for convenience purposes.
 	isort --skip=templates lecture tests

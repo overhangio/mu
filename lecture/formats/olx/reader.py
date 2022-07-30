@@ -75,12 +75,12 @@ class Reader(BaseReader):
                 title=unit_xml.attrs.get("display_name", ""),
                 question=question,
                 answers=[
-                (
-                    answer_xml.string,
-                    answer_xml.attrs.get("correct", "").lower() == "true",
-                )
-                for answer_xml in response_xml.find_all("choice")
-            ],
+                    (
+                        answer_xml.string,
+                        answer_xml.attrs.get("correct", "").lower() == "true",
+                    )
+                    for answer_xml in response_xml.find_all("choice")
+                ],
             )
         elif response_xml := unit_xml.find("stringresponse"):
             # Free text question

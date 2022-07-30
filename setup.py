@@ -23,7 +23,6 @@ def is_requirement(line: str) -> bool:
     return not (line.strip() == "" or line.startswith("#"))
 
 
-
 setup(
     name="lecture",
     version="0.0.1",
