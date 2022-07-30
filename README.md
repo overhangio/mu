@@ -65,7 +65,7 @@ Install development requirements:
 
 Run tests:
 
-    make test
+    make tests
 
 Reformat your code with [black](https://black.readthedocs.io/en/stable/):
 
