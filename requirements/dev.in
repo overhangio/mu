@@ -1,3 +1,6 @@
+-r base.txt
+
 black
 pylint
 ipdb
+pip-tools
