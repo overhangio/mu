@@ -8,33 +8,21 @@ from bs4 import BeautifulSoup
 
 from lecture import units
 from lecture.exceptions import LectureError
-from lecture.formats.base.reader import Reader as BaseReader
+from lecture.formats.base.reader import BaseReader
 from lecture.utils import youtube
 
 logger = logging.getLogger(__file__)
 
 
-def load(root_directory: str) -> units.Course:
-    """
-    TODO error management
-    """
-    reader = FilesystemReader(root_directory)
-    course = reader.read()
-    if not isinstance(course, units.Course):
-        # TODO this error management should happen in the BaseReader class
-        raise LectureError("Failed to parse course object in XML file")
-    return course
-
-
-class Reader(BaseReader):
+class InlineReader(BaseReader):
     def __init__(self, unit_xml: BeautifulSoup) -> None:
         # TODO error management
         # if not (course_xml := getattr(document, "course")):
         # raise LectureError("Missing top-level course attribute in XML file")
         self.unit_xml = unit_xml
 
-    def get_child_reader(self, child_xml: BeautifulSoup) -> "Reader":
-        return Reader(child_xml)
+    def get_child_reader(self, child_xml: BeautifulSoup) -> "InlineReader":
+        return InlineReader(child_xml)
 
     def parse(self) -> t.Iterable[units.Unit]:
         # We skip name-less children, such as 'NavigableString'
@@ -136,24 +124,18 @@ class Reader(BaseReader):
         )
 
 
-def get_unit_attributes(unit_xml: BeautifulSoup) -> t.Dict[str, t.Any]:
+class StringReader(InlineReader):
     """
-    Call this function in your custom `on_*` methods to get a dict of OLX key/value
-    attributes to be added to the created unit.
+    Reader for xml-formatted strings.
+
+    Convenient for unit testing.
     """
-    attributes = {}
-    for k, v in unit_xml.attrs.items():
-        attributes[f"olx-{k}"] = v
-    attributes["olx-type"] = unit_xml.name
-    return attributes
 
-
-class StringReader(Reader):
     def __init__(self, contents: str) -> None:
-        super().__init__(beautiful_soup(contents))
+        super().__init__(beautiful_soup(contents).find())
 
 
-class FilesystemReader(Reader):
+class Reader(InlineReader):
     """
     This reader can load xml files indicated by the `url_name` property. In such
     cases, the "url_name" will be stored among the unit attributes.
@@ -195,8 +177,24 @@ class FilesystemReader(Reader):
 
         super().__init__(unit_xml)
 
-    def get_child_reader(self, child_xml: BeautifulSoup) -> "FilesystemReader":
-        return FilesystemReader(self.root_directory, child_xml)
+    def get_child_reader(self, child_xml: BeautifulSoup) -> "Reader":
+        return Reader(self.root_directory, child_xml)
+
+    @classmethod
+    def create(cls, path: str) -> "Reader":
+        return cls(path)
+
+
+def get_unit_attributes(unit_xml: BeautifulSoup) -> t.Dict[str, t.Any]:
+    """
+    Call this function in your custom `on_*` methods to get a dict of OLX key/value
+    attributes to be added to the created unit.
+    """
+    attributes = {}
+    for k, v in unit_xml.attrs.items():
+        attributes[f"olx-{k}"] = v
+    attributes["olx-type"] = unit_xml.name
+    return attributes
 
 
 def load_xml(path: str) -> BeautifulSoup:

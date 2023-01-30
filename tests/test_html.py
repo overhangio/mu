@@ -1,7 +1,7 @@
 import unittest
 
 from lecture import units
-from lecture.formats.html.reader import DocumentReader, Reader
+from lecture.formats.html.reader import DocumentReader, StringReader
 from lecture.formats.html.reader import beautiful_soup as read_bs
 from lecture.formats.html.reader import get_header_level
 from lecture.formats.html.writer import Writer
@@ -63,9 +63,8 @@ class HtmlReaderTests(unittest.TestCase):
         self.assertEqual(1, len(course.children[1].children))
 
     def test_video(self) -> None:
-        reader = Reader(
-            read_bs(
-                """
+        reader = StringReader(
+            """
 <h1>My amazing video course</h1>
 <section data-lecture-type="video">
     <h2>Video 1</h2>
@@ -75,7 +74,6 @@ class HtmlReaderTests(unittest.TestCase):
     </video>
 </section>
 """
-            ).h1
         )
         course = reader.read()
         video = course.children[0]
@@ -87,15 +85,13 @@ class HtmlReaderTests(unittest.TestCase):
         )
 
     def test_video_no_source(self) -> None:
-        reader = Reader(
-            read_bs(
-                """
+        reader = StringReader(
+            """
 <h1>My amazing video course</h1>
 <section data-lecture-type="video">
     <h2>Video 1</h2>
     <video src="/media/cc0-videos/flower.mp4"></video>
 </section>"""
-            ).h1
         )
         course = reader.read()
         video = course.children[0]
@@ -103,9 +99,8 @@ class HtmlReaderTests(unittest.TestCase):
         self.assertEqual(["/media/cc0-videos/flower.mp4"], video.sources)
 
     def test_video_duplicate_sources(self) -> None:
-        reader = Reader(
-            read_bs(
-                """
+        reader = StringReader(
+            """
 <h1>My amazing video course</h1>
 <section data-lecture-type="video">
     <h2>Video 1</h2>
@@ -113,7 +108,6 @@ class HtmlReaderTests(unittest.TestCase):
         <source src="/media/cc0-videos/flower.mp4">
     </video>
 </section>"""
-            ).h1
         )
         course = reader.read()
         video = course.children[0]
@@ -121,15 +115,13 @@ class HtmlReaderTests(unittest.TestCase):
         self.assertEqual(["/media/cc0-videos/flower.mp4"], video.sources)
 
     def test_youtube_iframe(self) -> None:
-        reader = Reader(
-            read_bs(
-                """
+        reader = StringReader(
+            """
 <h1>My amazing youtube video course</h1>
 <section data-lecture-type="video">
     <iframe src='https://www.youtube.com/embed/dQw4w9WgXcQ'></iframe>
 </section>
 """
-            ).h1
         )
         unit = list(reader.parse())[0]
         video = unit.children[0]
@@ -137,14 +129,12 @@ class HtmlReaderTests(unittest.TestCase):
         self.assertEqual(["https://www.youtube.com/watch?v=dQw4w9WgXcQ"], video.sources)
 
     def test_html_paragraphs(self) -> None:
-        reader = Reader(
-            read_bs(
-                """
+        reader = StringReader(
+            """
 <h1>My html course</h1>
 <p>Paragraph 1 <img src="https://www.google.com/images/logo.png"></p>
 <p>Paragraph 2</p>
 """
-            ).h1
         )
         course = list(reader.parse())[0]
         self.assertEqual(1, len(course.children))
@@ -157,16 +147,14 @@ class HtmlReaderTests(unittest.TestCase):
         )
 
     def test_multi_raw_html_units(self) -> None:
-        reader = Reader(
-            read_bs(
-                """
+        reader = StringReader(
+            """
 <h1>My html course</h1>
 <p>Paragraph 1 <img src="https://www.google.com/images/logo.png"></p>
 <p>Paragraph 2</p>
 <video src="foo.mp4"></video>
 <p>Paragraph 3</p>
 """
-            ).h1
         )
         course = list(reader.parse())[0]
         self.assertEqual(1, len(course.children))

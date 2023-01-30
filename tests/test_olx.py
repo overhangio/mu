@@ -3,17 +3,15 @@ import unittest
 
 from lecture import units
 from lecture.formats.olx import writer as w
-from lecture.formats.olx.reader import Reader, beautiful_soup
+from lecture.formats.olx.reader import StringReader
 
 
 class OlxReaderTests(unittest.TestCase):
     def test_chapter(self) -> None:
-        reader = Reader(
-            beautiful_soup(
-                """<chapter display_name='hello world'>
+        reader = StringReader(
+            """<chapter display_name='hello world'>
     <sequential display_name='My little sequential' />
 </chapter>"""
-            ).chapter
         )
         chapter = list(reader.parse())[0]
         assert chapter is not None
@@ -23,10 +21,8 @@ class OlxReaderTests(unittest.TestCase):
         self.assertEqual("sequential", chapter.children[0].attributes["olx-type"])
 
     def test_video(self) -> None:
-        reader = Reader(
-            beautiful_soup(
-                "<video youtube_id_1_0='dQw4w9WgXcQ'><source src='myvideo.mp4'/></video>"
-            ).video
+        reader = StringReader(
+            "<video youtube_id_1_0='dQw4w9WgXcQ'><source src='myvideo.mp4'/></video>"
         )
         video = list(reader.parse())[0]
         assert isinstance(video, units.Video)
@@ -36,9 +32,7 @@ class OlxReaderTests(unittest.TestCase):
         self.assertEqual("myvideo.mp4", video.sources[1])
 
     def test_youtube_video_speed_ratio(self) -> None:
-        reader = Reader(
-            beautiful_soup("<video youtube='1.00:dQw4w9WgXcQ'></video>").video
-        )
+        reader = StringReader("<video youtube='1.00:dQw4w9WgXcQ'></video>")
         video = list(reader.parse())[0]
         assert isinstance(video, units.Video)
         self.assertEqual(
@@ -46,7 +40,7 @@ class OlxReaderTests(unittest.TestCase):
         )
 
     def test_html(self) -> None:
-        reader = Reader(beautiful_soup("<html><p>hello world!</p></html>").html)
+        reader = StringReader("<html><p>hello world!</p></html>")
         html = list(reader.parse())[0]
         assert isinstance(html, units.RawHtml)
         self.assertEqual("<p>hello world!</p>", html.contents)

@@ -1,7 +1,7 @@
 <problem display_name="Free text question">
  <stringresponse answer="None">
   <label>
-   How many legs does an healthy snake have?
+   How many legs does a healthy snake have?
   </label>
   <additional_answer answer="Zero">
   </additional_answer>

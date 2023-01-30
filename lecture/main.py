@@ -21,12 +21,14 @@ def main() -> None:
 def run() -> None:
     args = parse_args()
 
-    load_module = f"lecture.formats.{args.from_format}.reader"
-    load_func = importlib.import_module(load_module).load
+    reader_module = importlib.import_module(
+        f"lecture.formats.{args.from_format}.reader"
+    )
+    ReaderClass = getattr(reader_module, "Reader")
     dump_module = f"lecture.formats.{args.to_format}.writer"
     dump_func = importlib.import_module(dump_module).dump
 
-    course = load_func(args.input)
+    course = ReaderClass.create(args.input).read()
     dump_func(course, args.output)
 
 
