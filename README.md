@@ -92,3 +92,10 @@ Want to add a new type of content to your course? Here's a general approach:
 ## License
 
 This work is licensed under the terms of the [GNU Affero General Public License (AGPL)](https://github.com/overhangio/lecture/blob/master/LICENSE.txt).
+
+<!-- TODO:
+- how to support a new format
+- extensibility?
+- supported unit types: do we really need R+W symbols?
+- Contributing section
+- Troubleshooting -->
