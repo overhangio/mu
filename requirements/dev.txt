@@ -4,15 +4,15 @@
 #
 #    pip-compile requirements/dev.in
 #
-astroid==2.11.7
+astroid==2.14.1
     # via pylint
-asttokens==2.0.5
+asttokens==2.2.1
     # via stack-data
 backcall==0.2.0
     # via ipython
-beautifulsoup4==4.11.1
+beautifulsoup4==4.11.2
     # via -r requirements/base.txt
-black==22.6.0
+black==23.1.0
     # via -r requirements/dev.in
 build==0.10.0
     # via pip-tools
@@ -24,29 +24,29 @@ decorator==5.1.1
     # via
     #   ipdb
     #   ipython
-dill==0.3.5.1
+dill==0.3.6
     # via pylint
-executing==0.9.1
+executing==1.2.0
     # via stack-data
 html5lib==1.1
     # via -r requirements/base.txt
-ipdb==0.13.9
+ipdb==0.13.11
     # via -r requirements/dev.in
-ipython==8.4.0
+ipython==8.9.0
     # via ipdb
-isort==5.10.1
+isort==5.12.0
     # via pylint
-jedi==0.18.1
+jedi==0.18.2
     # via ipython
-lazy-object-proxy==1.7.1
+lazy-object-proxy==1.9.0
     # via astroid
-lxml==4.9.1
+lxml==4.9.2
     # via -r requirements/base.txt
-matplotlib-inline==0.1.3
+matplotlib-inline==0.1.6
     # via ipython
 mccabe==0.7.0
     # via pylint
-mypy==0.971
+mypy==0.991
     # via -r requirements/base.txt
 mypy-extensions==0.4.3
     # via
@@ -54,30 +54,32 @@ mypy-extensions==0.4.3
     #   black
     #   mypy
 packaging==23.0
-    # via build
+    # via
+    #   black
+    #   build
 parso==0.8.3
     # via jedi
-pathspec==0.9.0
+pathspec==0.11.0
     # via black
 pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pip-tools==6.12.1
+pip-tools==6.12.2
     # via -r requirements/dev.in
-platformdirs==2.5.2
+platformdirs==2.6.2
     # via
     #   black
     #   pylint
-prompt-toolkit==3.0.30
+prompt-toolkit==3.0.36
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.2
     # via stack-data
-pygments==2.12.0
+pygments==2.14.0
     # via ipython
-pylint==2.14.5
+pylint==2.16.0
     # via -r requirements/dev.in
 pyproject-hooks==1.0.0
     # via build
@@ -89,29 +91,29 @@ soupsieve==2.3.2.post1
     # via
     #   -r requirements/base.txt
     #   beautifulsoup4
-stack-data==0.3.0
+stack-data==0.6.2
     # via ipython
-toml==0.10.2
-    # via ipdb
 tomli==2.0.1
     # via
     #   -r requirements/base.txt
     #   black
     #   build
+    #   ipdb
     #   mypy
     #   pylint
     #   pyproject-hooks
-tomlkit==0.11.1
+tomlkit==0.11.6
     # via pylint
-traitlets==5.3.0
+traitlets==5.9.0
     # via
     #   ipython
     #   matplotlib-inline
-typing-extensions==4.3.0
+typing-extensions==4.4.0
     # via
     #   -r requirements/base.txt
+    #   astroid
     #   mypy
-wcwidth==0.2.5
+wcwidth==0.2.6
     # via prompt-toolkit
 webencodings==0.5.1
     # via
