@@ -15,6 +15,7 @@ logger = logging.getLogger(__file__)
 
 
 class InlineReader(BaseReader):
+    # pylint: disable=super-init-not-called
     def __init__(self, unit_xml: BeautifulSoup) -> None:
         # TODO error management
         # if not (course_xml := getattr(document, "course")):
@@ -179,10 +180,6 @@ class Reader(InlineReader):
 
     def get_child_reader(self, child_xml: BeautifulSoup) -> "Reader":
         return Reader(self.root_directory, child_xml)
-
-    @classmethod
-    def create(cls, path: str) -> "Reader":
-        return cls(path)
 
 
 def get_unit_attributes(unit_xml: BeautifulSoup) -> t.Dict[str, t.Any]:

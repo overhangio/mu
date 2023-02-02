@@ -1,4 +1,3 @@
-import os
 import typing as t
 
 from lecture import units
@@ -14,6 +13,9 @@ class BaseReader:
     Child classes should also implement a constructor that takes a single path as
     argument.
     """
+
+    def __init__(self, path: str) -> None:
+        raise NotImplementedError
 
     def read(self) -> units.Course:
         """
@@ -55,22 +57,3 @@ class BaseReader:
         )
         if on_func is not None:
             yield from on_func(*args, **kwargs)
-
-
-class BaseFileReader(BaseReader):
-    """
-    Same as BaseReader, but with an extra `create(path)` method.
-    """
-
-    def __init__(self, content: str) -> None:
-        raise NotImplementedError
-
-    @classmethod
-    def create(cls, path: str) -> "BaseFileReader":
-        """
-        Override this method if the child class does not read from a single file.
-        """
-        if not os.path.isfile(path):
-            raise ValueError(f"Could not read from file: {path}")
-        with open(path, encoding="utf-8") as f:
-            return cls(f.read())

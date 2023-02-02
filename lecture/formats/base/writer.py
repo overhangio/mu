@@ -1,11 +1,11 @@
 from lecture import units
 
 
-class Writer:
+class BaseWriter:
     def write_to(self, path: str) -> None:
         raise NotImplementedError
 
-    def write(self, unit: units.Unit) -> None:
+    def write(self, unit: units.Unit) -> "BaseWriter":
         # Get the "on_<Name>" function that corresponds to the unit type.
         on_func = getattr(self, f"on_{unit.__class__.__name__.lower()}")
         on_func(unit)
@@ -13,6 +13,8 @@ class Writer:
         # Write children recursively: depth-first traversal
         for child in unit.children:
             self.write(child)
+
+        return self
 
     def on_unit(self, unit: units.Unit) -> None:
         pass

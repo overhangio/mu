@@ -1,19 +1,20 @@
 import subprocess
 import tempfile
 
-from lecture import units
-from lecture.formats.html.writer import StyledWriter
+from lecture.formats.html.writer import Writer as HtmlWriter
 
 
-def dump(course: units.Course, path: str) -> None:
-    writer = StyledWriter()
-    writer.write(course)
+class Writer(HtmlWriter):
+    """
+    Same as HTML writer, except that we convert the output to Markdown.
+    """
 
-    # Write html to temporary file
-    with tempfile.NamedTemporaryFile("w") as of:
-        writer.write_to(of.name)
-        of.flush()
-        # Convert file with pandoc
-        subprocess.check_call(
-            ["pandoc", "--from=html", "--to=markdown", of.name, f"--output={path}"]
-        )
+    def write_to(self, path: str) -> None:
+        # Write html to temporary file
+        with tempfile.NamedTemporaryFile("w") as of:
+            super().write_to(of.name)
+            of.flush()
+            # Convert file with pandoc
+            subprocess.check_call(
+                ["pandoc", "--from=html", "--to=markdown", of.name, f"--output={path}"]
+            )

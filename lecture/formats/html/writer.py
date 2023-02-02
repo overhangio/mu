@@ -4,18 +4,12 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from lecture import units
-from lecture.formats.base.writer import Writer as BaseWriter
+from lecture.formats.base.writer import BaseWriter
 from lecture.utils import youtube
 from .common import TYPE_ATTR
 
 
-def dump(course: units.Course, path: str) -> None:
-    writer = StyledWriter()
-    writer.write(course)
-    writer.write_to(path)
-
-
-class Writer(BaseWriter):
+class UnstyledWriter(BaseWriter):
     def __init__(self) -> None:
         self.document = beautiful_soup("<!DOCTYPE html>")
 
@@ -130,7 +124,7 @@ class Writer(BaseWriter):
         self.append_to_body(BeautifulSoup(unit.contents, "html.parser"))
 
 
-class StyledWriter(Writer):
+class Writer(UnstyledWriter):
     """
     Add some basic CSS styling to the default writer.
     """

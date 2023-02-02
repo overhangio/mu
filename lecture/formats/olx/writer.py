@@ -7,16 +7,10 @@ from bs4 import BeautifulSoup, Tag
 
 from lecture import units
 from lecture.exceptions import LectureError
-from lecture.formats.base.writer import Writer as BaseWriter
+from lecture.formats.base.writer import BaseWriter
 from lecture.utils.youtube import get_video_id as get_youtube_video_id
 
 logger = logging.getLogger(__name__)
-
-
-def dump(course: units.Course, path: str) -> None:
-    writer = Writer()
-    writer.write(course)
-    writer.write_to(path)
 
 
 class Writer(BaseWriter):
@@ -25,6 +19,11 @@ class Writer(BaseWriter):
         self.xml_paths: t.List[t.Tuple[Tag, str]] = []
         # unit -> xml dict
         self.unit_xml: t.Dict[units.Unit, Tag] = {}
+
+    def write_to(self, path: str) -> None:
+        for unit_xml, unit_path in self.xml_paths:
+            # Write all xml files
+            write_xml(unit_xml, os.path.join(path, unit_path), makedirs=True)
 
     def on_unit(self, unit: units.Unit) -> None:
         # TODO we should complain about non-header units which are not level 5
@@ -186,11 +185,6 @@ class Writer(BaseWriter):
             parent = parent.parent
 
         return unit_xml
-
-    def write_to(self, path: str) -> None:
-        for unit_xml, unit_path in self.xml_paths:
-            # Write all xml files
-            write_xml(unit_xml, os.path.join(path, unit_path), makedirs=True)
 
 
 def get_url_name(unit: units.Unit) -> str:

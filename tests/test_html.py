@@ -4,7 +4,7 @@ from lecture import units
 from lecture.formats.html.reader import DocumentReader, StringReader
 from lecture.formats.html.reader import beautiful_soup as read_bs
 from lecture.formats.html.reader import get_header_level
-from lecture.formats.html.writer import Writer
+from lecture.formats.html.writer import Writer, UnstyledWriter
 
 
 class HtmlReaderTests(unittest.TestCase):
@@ -172,7 +172,7 @@ class HtmlReaderTests(unittest.TestCase):
 class HtmlWriterTests(unittest.TestCase):
     def test_top_level_serialization(self) -> None:
         course = units.Course(title="Python programming 101")
-        writer = Writer()
+        writer = UnstyledWriter()
         writer.write(course)
         output = writer.dumps()
         self.assertEqual(
@@ -192,7 +192,7 @@ class HtmlWriterTests(unittest.TestCase):
     def test_top_level_with_subunit_serialization(self) -> None:
         course = units.Course(title="Python programming 101")
         course.add_child(units.Course(title="Part1: variables"))
-        writer = Writer()
+        writer = UnstyledWriter()
         writer.write(course)
         output = writer.dumps()
         self.assertEqual(

@@ -4,8 +4,7 @@ from lecture.formats.html.reader import DocumentReader, beautiful_soup
 
 
 class Reader(DocumentReader):
-    @classmethod
-    def create(cls, path: str) -> "Reader":
+    def __init__(self, path: str) -> None:
         """
         Same as an HTML reader, but convert from markdown at runtime.
         """
@@ -24,4 +23,4 @@ class Reader(DocumentReader):
             if video_html.parent and video_html.parent.name == "p":
                 video_html.parent.replace_with_children()
 
-        return cls(html)
+        super().__init__(html)

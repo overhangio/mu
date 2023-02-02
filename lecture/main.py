@@ -4,8 +4,11 @@ import importlib
 import logging
 import os
 import sys
+import typing as t
 
 from lecture.exceptions import LectureError
+from lecture.formats.base.reader import BaseReader
+from lecture.formats.base.writer import BaseWriter
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +24,20 @@ def main() -> None:
 def run() -> None:
     args = parse_args()
 
-    reader_module = importlib.import_module(
-        f"lecture.formats.{args.from_format}.reader"
+    ReaderClass: t.Type[BaseReader] = import_class(
+        f"lecture.formats.{args.from_format}.reader", "Reader"
     )
-    ReaderClass = getattr(reader_module, "Reader")
-    dump_module = f"lecture.formats.{args.to_format}.writer"
-    dump_func = importlib.import_module(dump_module).dump
+    WriterClass: t.Type[BaseWriter] = import_class(
+        f"lecture.formats.{args.to_format}.writer", "Writer"
+    )
 
-    course = ReaderClass.create(args.input).read()
-    dump_func(course, args.output)
+    course = ReaderClass(args.input).read()
+    WriterClass().write(course).write_to(args.output)
+
+
+def import_class(module_name: str, class_name: str) -> t.Any:
+    module = importlib.import_module(module_name)
+    return getattr(module, class_name)
 
 
 def parse_args() -> argparse.Namespace:
