@@ -12,7 +12,7 @@ Supported formats:
 
 ## Installation
 
-    pip install git+https://github.com/overhangio/mu
+    pip install mu-courses
 
 ## Requirements
 

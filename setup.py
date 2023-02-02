@@ -24,7 +24,7 @@ def is_requirement(line: str) -> bool:
 
 
 setup(
-    name="mu",
+    name="mu-courses",
     version="0.0.1",
     url="https://github.com/overhangio/mu/",
     project_urls={
