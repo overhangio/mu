@@ -1,6 +1,6 @@
 import unittest
 
-from lecture.utils import youtube
+from mu.utils import youtube
 
 
 class UtilsTests(unittest.TestCase):

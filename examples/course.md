@@ -1,4 +1,4 @@
-# My course title {olx-org=overhangio olx-course=lecture olx-url_name=session1}
+# My course title {olx-org=overhangio olx-course=mu olx-url_name=session1}
 
 ## Chapter 1
 
@@ -6,7 +6,7 @@
 
 #### Syllabus
 
-::: {lecture-type=video}
+::: {mu-type=video}
 
 ##### Video
 
@@ -29,7 +29,7 @@ Raw code:
 
 #### Problems
 
-::: {lecture-type=mcq}
+::: {mu-type=mcq}
 
 #### Multiple choice question
 
@@ -42,7 +42,7 @@ What is the answer to Life, the Universe, and Everything?
 
 :::
 
-::: {lecture-type=ftq}
+::: {mu-type=ftq}
 
 #### Free text question
 

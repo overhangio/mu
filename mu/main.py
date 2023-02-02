@@ -6,9 +6,9 @@ import os
 import sys
 import typing as t
 
-from lecture.exceptions import LectureError
-from lecture.formats.base.reader import BaseReader
-from lecture.formats.base.writer import BaseWriter
+from mu.exceptions import MuError
+from mu.formats.base.reader import BaseReader
+from mu.formats.base.writer import BaseWriter
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     try:
         run()
-    except LectureError as e:
+    except MuError as e:
         logger.error(e.args[0])
         sys.exit(1)
 
@@ -25,10 +25,10 @@ def run() -> None:
     args = parse_args()
 
     ReaderClass: t.Type[BaseReader] = import_class(
-        f"lecture.formats.{args.from_format}.reader", "Reader"
+        f"mu.formats.{args.from_format}.reader", "Reader"
     )
     WriterClass: t.Type[BaseWriter] = import_class(
-        f"lecture.formats.{args.to_format}.writer", "Writer"
+        f"mu.formats.{args.to_format}.writer", "Writer"
     )
 
     course = ReaderClass(args.input).read()
@@ -76,7 +76,7 @@ def parse_args() -> argparse.Namespace:
         elif os.path.isdir(args.input):
             args.from_format = "olx"
         else:
-            raise LectureError("Could not detect input file format.")
+            raise MuError("Could not detect input file format.")
         logger.info("Detected input format: %s", args.from_format)
 
     if args.to_format is None:
@@ -87,7 +87,7 @@ def parse_args() -> argparse.Namespace:
         elif os.path.isdir(args.output):
             args.to_format = "olx"
         else:
-            raise LectureError("Could not detect output file format.")
+            raise MuError("Could not detect output file format.")
         logger.info("Detected output format: %s", args.to_format)
 
     return args

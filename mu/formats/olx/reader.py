@@ -6,10 +6,10 @@ import typing as t
 
 from bs4 import BeautifulSoup
 
-from lecture import units
-from lecture.exceptions import LectureError
-from lecture.formats.base.reader import BaseReader
-from lecture.utils import youtube
+from mu import units
+from mu.exceptions import MuError
+from mu.formats.base.reader import BaseReader
+from mu.utils import youtube
 
 logger = logging.getLogger(__file__)
 
@@ -19,7 +19,7 @@ class InlineReader(BaseReader):
     def __init__(self, unit_xml: BeautifulSoup) -> None:
         # TODO error management
         # if not (course_xml := getattr(document, "course")):
-        # raise LectureError("Missing top-level course attribute in XML file")
+        # raise MuError("Missing top-level course attribute in XML file")
         self.unit_xml = unit_xml
 
     def get_child_reader(self, child_xml: BeautifulSoup) -> "InlineReader":
@@ -150,7 +150,7 @@ class Reader(InlineReader):
             # Load course.xml from file
             unit_xml = load_xml(os.path.join(self.root_directory, "course.xml"))
             if not hasattr(unit_xml, "course"):
-                raise LectureError(
+                raise MuError(
                     "Badly formatted course.xml file: missing <course> element"
                 )
             unit_xml = unit_xml.course
@@ -196,7 +196,7 @@ def get_unit_attributes(unit_xml: BeautifulSoup) -> t.Dict[str, t.Any]:
 
 def load_xml(path: str) -> BeautifulSoup:
     if not os.path.isfile(path):
-        raise LectureError(f"Missing XML file: '{path}'")
+        raise MuError(f"Missing XML file: '{path}'")
     with open(path, encoding="utf-8") as f:
         return beautiful_soup(f)
 

@@ -24,13 +24,12 @@ def is_requirement(line: str) -> bool:
 
 
 setup(
-    name="lecture",
+    name="mu",
     version="0.0.1",
-    url="https://github.com/overhangio/lecture/",
+    url="https://github.com/overhangio/mu/",
     project_urls={
-        "Documentation": "https://lecture.readthedocs.io",
-        "Code": "https://github.com/overhangio/lecture",
-        "Issue tracker": "https://github.com/overhangio/lecture/issues",
+        "Code": "https://github.com/overhangio/mu",
+        "Issue tracker": "https://github.com/overhangio/mu/issues",
     },
     license="AGPLv3",
     author="Overhang.IO",
@@ -42,7 +41,7 @@ setup(
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=load_requirements("base.in"),
-    entry_points={"console_scripts": ["lecture=lecture.main:main"]},
+    entry_points={"console_scripts": ["mu=mu.main:main"]},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",

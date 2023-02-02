@@ -3,9 +3,10 @@ import os
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from lecture import units
-from lecture.formats.base.writer import BaseWriter
-from lecture.utils import youtube
+from mu import units
+from mu.formats.base.writer import BaseWriter
+from mu.utils import youtube
+
 from .common import TYPE_ATTR
 
 

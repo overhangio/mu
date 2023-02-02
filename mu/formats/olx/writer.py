@@ -5,10 +5,10 @@ import typing as t
 
 from bs4 import BeautifulSoup, Tag
 
-from lecture import units
-from lecture.exceptions import LectureError
-from lecture.formats.base.writer import BaseWriter
-from lecture.utils.youtube import get_video_id as get_youtube_video_id
+from mu import units
+from mu.exceptions import MuError
+from mu.formats.base.writer import BaseWriter
+from mu.utils.youtube import get_video_id as get_youtube_video_id
 
 logger = logging.getLogger(__name__)
 
@@ -213,7 +213,7 @@ def write_xml(tag: Tag, path: str, makedirs: bool = False) -> None:
     if makedirs:
         os.makedirs(directory, exist_ok=True)
     if not os.path.exists(directory):
-        raise LectureError(f"Destination directory does not exist: {directory}")
+        raise MuError(f"Destination directory does not exist: {directory}")
     with open(path, "w", encoding="utf-8") as f:
         f.write(tag.prettify())
         f.write("\n")

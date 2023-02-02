@@ -14,32 +14,32 @@ tests: test-lint test-unit test-types test-format ## Run all tests
 .PHONY := tests
 
 test-lint: ## Run linting tests
-	pylint --errors-only --enable=unused-import,unused-argument lecture tests setup.py
+	pylint --errors-only --enable=unused-import,unused-argument mu tests setup.py
 
 test-unit: ## Run unit tests
 	python -m unittest discover tests
 
 test-types: ## Check types with mypy
-	mypy --ignore-missing-imports --strict lecture tests
+	mypy --ignore-missing-imports --strict mu tests
 
 test-format: ## Check code formatting
-	black --check lecture tests
+	black --check mu tests
 
 format: ## Auto-format code with black
-	black lecture tests setup.py
+	black mu tests setup.py
 
 isort: ## Sort imports. This target is not mandatory because the output may be incompatible with black formatting. Provided for convenience purposes.
-	isort --skip=templates lecture tests
+	isort --skip=templates mu tests
 
 examples: example-html example-olx ## Generate examples from the markdown file
 .PHONY: examples
 
 example-html: ## Generate HTML example from the markdown file
-	lecture -v examples/course.md examples/course.html
+	mu -v examples/course.md examples/course.html
 
 example-olx: ## Generate OLX example from the markdown file
 	rm -rf examples/olx/*
-	lecture -v examples/course.md examples/olx/
+	mu -v examples/course.md examples/olx/
 	tar --mtime='UTC 2023-01-01' -czf examples/olx.tar.gz examples/olx
 
 ###### Additional commands

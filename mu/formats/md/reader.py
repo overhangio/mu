@@ -1,6 +1,6 @@
 import subprocess
 
-from lecture.formats.html.reader import DocumentReader, beautiful_soup
+from mu.formats.html.reader import DocumentReader, beautiful_soup
 
 
 class Reader(DocumentReader):

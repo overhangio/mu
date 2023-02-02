@@ -1,9 +1,9 @@
 import os
 import unittest
 
-from lecture import units
-from lecture.formats.olx import writer as w
-from lecture.formats.olx.reader import StringReader
+from mu import units
+from mu.formats.olx import writer as w
+from mu.formats.olx.reader import StringReader
 
 
 class OlxReaderTests(unittest.TestCase):

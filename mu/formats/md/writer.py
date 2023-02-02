@@ -1,7 +1,7 @@
 import subprocess
 import tempfile
 
-from lecture.formats.html.writer import Writer as HtmlWriter
+from mu.formats.html.writer import Writer as HtmlWriter
 
 
 class Writer(HtmlWriter):

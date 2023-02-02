@@ -1,10 +1,10 @@
 import unittest
 
-from lecture import units
-from lecture.formats.html.reader import DocumentReader, StringReader
-from lecture.formats.html.reader import beautiful_soup as read_bs
-from lecture.formats.html.reader import get_header_level
-from lecture.formats.html.writer import Writer, UnstyledWriter
+from mu import units
+from mu.formats.html.reader import DocumentReader, StringReader
+from mu.formats.html.reader import beautiful_soup as read_bs
+from mu.formats.html.reader import get_header_level
+from mu.formats.html.writer import UnstyledWriter, Writer
 
 
 class HtmlReaderTests(unittest.TestCase):
@@ -66,7 +66,7 @@ class HtmlReaderTests(unittest.TestCase):
         reader = StringReader(
             """
 <h1>My amazing video course</h1>
-<section data-lecture-type="video">
+<section data-mu-type="video">
     <h2>Video 1</h2>
     <video>
         <source src="https://youtu.be/dQw4w9WgXcQ">
@@ -88,7 +88,7 @@ class HtmlReaderTests(unittest.TestCase):
         reader = StringReader(
             """
 <h1>My amazing video course</h1>
-<section data-lecture-type="video">
+<section data-mu-type="video">
     <h2>Video 1</h2>
     <video src="/media/cc0-videos/flower.mp4"></video>
 </section>"""
@@ -102,7 +102,7 @@ class HtmlReaderTests(unittest.TestCase):
         reader = StringReader(
             """
 <h1>My amazing video course</h1>
-<section data-lecture-type="video">
+<section data-mu-type="video">
     <h2>Video 1</h2>
     <video src="/media/cc0-videos/flower.mp4">
         <source src="/media/cc0-videos/flower.mp4">
@@ -118,7 +118,7 @@ class HtmlReaderTests(unittest.TestCase):
         reader = StringReader(
             """
 <h1>My amazing youtube video course</h1>
-<section data-lecture-type="video">
+<section data-mu-type="video">
     <iframe src='https://www.youtube.com/embed/dQw4w9WgXcQ'></iframe>
 </section>
 """

@@ -4,10 +4,11 @@ import typing as t
 
 from bs4 import BeautifulSoup
 
-from lecture import units
-from lecture.exceptions import LectureError
-from lecture.formats.base.reader import BaseReader
-from lecture.utils import youtube
+from mu import units
+from mu.exceptions import MuError
+from mu.formats.base.reader import BaseReader
+from mu.utils import youtube
+
 from .common import TYPE_ATTR
 
 
@@ -45,7 +46,7 @@ class HtmlReader(BaseReader):
         Parse `<section>` DOM elements.
 
         The parsing function that is called depends on the value of the
-        "data-lecture-type" attribute.
+        "data-mu-type" attribute.
         """
         unit_type = unit_html.attrs.get(TYPE_ATTR)
         if unit_type == "mcq":
@@ -123,7 +124,7 @@ class DocumentReader(HtmlReader):
         if h1 := document.find(name="h1"):
             super().__init__(h1)
         else:
-            raise LectureError("Could not find any h1 element in the HTML document")
+            raise MuError("Could not find any h1 element in the HTML document")
 
 
 class StringReader(DocumentReader):
@@ -176,7 +177,7 @@ def process_mcq(unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
             is_correct = False
         else:
             # Not a multiple choice question
-            raise LectureError(
+            raise MuError(
                 f"Incorrectly formatted answer in multiple choice question: "
                 f"should start with either {right} or {wrong}"
             )
@@ -207,9 +208,7 @@ def process_video(unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
     iframe_html = unit_html.find("iframe")
     if video_html is None and iframe_html is None:
         # TODO better context in error message
-        raise LectureError(
-            "Missing <video> or <iframe> element in unit labelled as video"
-        )
+        raise MuError("Missing <video> or <iframe> element in unit labelled as video")
 
     if video_html:
         sources: t.List[str] = []
@@ -238,14 +237,14 @@ def get_question_answers(unit_html: BeautifulSoup) -> t.Tuple[str, str, t.List[s
     question_html = unit_html.find("p")
     if question_html is None:
         # TODO better error management
-        raise LectureError("Missing <p> question element in multiple choice question")
+        raise MuError("Missing <p> question element in multiple choice question")
     question = question_html.string.strip()
     if question is None:
-        raise LectureError("Missing question element in multiple choice question")
+        raise MuError("Missing question element in multiple choice question")
     ul_html = unit_html.find("ul")
     if ul_html is None:
         # TODO better error management
-        raise LectureError("Missing <ul> element in multiple choice question")
+        raise MuError("Missing <ul> element in multiple choice question")
     for li_html in ul_html.find_all("li"):
         answer = li_html.string.strip()
         answers.append(answer.strip())

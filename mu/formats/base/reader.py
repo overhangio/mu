@@ -1,7 +1,7 @@
 import typing as t
 
-from lecture import units
-from lecture.exceptions import LectureError
+from mu import units
+from mu.exceptions import MuError
 
 T = t.TypeVar("T")
 
@@ -27,12 +27,12 @@ class BaseReader:
         for course in self.parse():
             if not isinstance(course, units.Course):
                 # TODO better message
-                raise LectureError(
+                raise MuError(
                     f"Failed to parse course. Expected Course object, got {course.__class__}"
                 )
             return course
         # TODO what if there are multiple courses found?
-        raise LectureError("No course found")
+        raise MuError("No course found")
 
     def parse(self) -> t.Iterable[units.Unit]:
         """

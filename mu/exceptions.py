@@ -1,0 +1,2 @@
+class MuError(Exception):
+    pass
