@@ -11,15 +11,12 @@ from mu.exceptions import MuError
 from mu.formats.base.reader import BaseReader
 from mu.utils import youtube
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class InlineReader(BaseReader):
     # pylint: disable=super-init-not-called
     def __init__(self, unit_xml: BeautifulSoup) -> None:
-        # TODO error management
-        # if not (course_xml := getattr(document, "course")):
-        # raise MuError("Missing top-level course attribute in XML file")
         self.unit_xml = unit_xml
 
     def get_child_reader(self, child_xml: BeautifulSoup) -> "InlineReader":
@@ -161,20 +158,20 @@ class Reader(InlineReader):
                 self.root_directory, unit_xml.name, f"{url_name}.xml"
             )
             if not os.path.exists(url_name_path):
-                # TODO should we really just ignore this file?
                 logger.warning(
                     "Failed to load unit. File does not exist: %s", url_name_path
                 )
             else:
                 new_unit_xml = getattr(load_xml(url_name_path), unit_xml.name)
-                # TODO error management
-                # What to do when the loaded element has no child with the selected name?
-                if new_unit_xml is not None:
-                    new_unit_xml.attrs["url_name"] = url_name
-                    # Copy attributes from source element
-                    new_unit_xml.attrs.update(unit_xml.attrs)
-                    # Replace source element
-                    unit_xml = new_unit_xml
+                if new_unit_xml is None:
+                    raise MuError(
+                        f"Element with name '{unit_xml.name}' could not be found in {url_name_path}"
+                    )
+                new_unit_xml.attrs["url_name"] = url_name
+                # Copy attributes from source element
+                new_unit_xml.attrs.update(unit_xml.attrs)
+                # Replace source element
+                unit_xml = new_unit_xml
 
         super().__init__(unit_xml)
 

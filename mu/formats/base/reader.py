@@ -8,10 +8,11 @@ T = t.TypeVar("T")
 
 class BaseReader:
     """
-    TODO document me
+    Abstract base class for reading course documents.
 
-    Child classes should also implement a constructor that takes a single path as
-    argument.
+    Child classes should implement:
+    - a constructor that takes a single path as argument.
+    - the `parse()` method, which should yield the course units.
     """
 
     def __init__(self, path: str) -> None:
@@ -26,13 +27,11 @@ class BaseReader:
         """
         for course in self.parse():
             if not isinstance(course, units.Course):
-                # TODO better message
                 raise MuError(
-                    f"Failed to parse course. Expected Course object, got {course.__class__}"
+                    f"Reader failed to read course. Expected {units.Course} object, but reader yielded {course.__class__}."
                 )
             return course
-        # TODO what if there are multiple courses found?
-        raise MuError("No course found")
+        raise MuError("Reader failed to read course: no course found")
 
     def parse(self) -> t.Iterable[units.Unit]:
         """

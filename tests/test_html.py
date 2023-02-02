@@ -1,7 +1,7 @@
 import unittest
 
 from mu import units
-from mu.formats.html.reader import DocumentReader, StringReader
+from mu.formats.html.reader import DocumentReader, HtmlReader, StringReader
 from mu.formats.html.reader import beautiful_soup as read_bs
 from mu.formats.html.reader import get_header_level
 from mu.formats.html.writer import UnstyledWriter, Writer
@@ -146,6 +146,32 @@ class HtmlReaderTests(unittest.TestCase):
             child.contents,
         )
 
+    def test_unit_without_header(self) -> None:
+        reader = HtmlReader(read_bs("<p>Paragraph</p>").p)
+        parsed_units = list(reader.parse())
+        self.assertEqual(1, len(parsed_units))
+        assert isinstance(parsed_units[0], units.RawHtml)
+        self.assertEqual("<p>Paragraph</p>", parsed_units[0].contents)
+
+    def test_raw_html_data_attributes(self) -> None:
+        reader = StringReader(
+            """
+<h1>My html course</h1>
+<p data-attr1="val1" attr2="val2", data-attr3="val3">Paragraph</p>
+"""
+        )
+        course = reader.read()
+        self.assertEqual(1, len(course.children))
+        child = course.children[0]
+        assert isinstance(child, units.RawHtml)
+        self.assertEqual(
+            {
+                "data-attr1": "val1",
+                "data-attr3": "val3",
+            },
+            child.attributes,
+        )
+
     def test_multi_raw_html_units(self) -> None:
         reader = StringReader(
             """
@@ -156,7 +182,7 @@ class HtmlReaderTests(unittest.TestCase):
 <p>Paragraph 3</p>
 """
         )
-        course = list(reader.parse())[0]
+        course = reader.read()
         self.assertEqual(1, len(course.children))
         child = course.children[0]
         assert isinstance(child, units.RawHtml)

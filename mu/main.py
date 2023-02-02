@@ -31,8 +31,14 @@ def run() -> None:
         f"mu.formats.{args.to_format}.writer", "Writer"
     )
 
-    course = ReaderClass(args.input).read()
-    WriterClass().write(course).write_to(args.output)
+    try:
+        course = ReaderClass(args.input).read()
+    except MuError as e:
+        raise MuError(f"Error in {args.from_format} reader: {e.args[0]}") from e
+    try:
+        WriterClass().write(course).write_to(args.output)
+    except MuError as e:
+        raise MuError(f"Error in in {args.to_format} writer: {e.args[0]}") from e
 
 
 def import_class(module_name: str, class_name: str) -> t.Any:

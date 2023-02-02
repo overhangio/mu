@@ -1,3 +1,4 @@
+import logging
 import os
 
 from bs4 import BeautifulSoup
@@ -8,6 +9,8 @@ from mu.formats.base.writer import BaseWriter
 from mu.utils import youtube
 
 from .common import TYPE_ATTR
+
+logger = logging.getLogger(__name__)
 
 
 class UnstyledWriter(BaseWriter):
@@ -87,7 +90,6 @@ class UnstyledWriter(BaseWriter):
         """
         We parse the video sources. If one is youtube, we include a youtube iframe.
         Else, we include a <video> element.
-        TODO cleaner code?
         """
         section_html = Tag(name="section", attrs={TYPE_ATTR: "video"})
 
@@ -95,30 +97,8 @@ class UnstyledWriter(BaseWriter):
         section_html.append(self.get_header(unit))
 
         # TODO handle transcripts
-        video_tag = Tag(name="video", attrs={"controls": None})
-        youtube_video_tag = None
-        for source in unit.sources:
-            if youtube_embed_url := youtube.get_embed_url(source):
-                youtube_video_tag = Tag(
-                    name="iframe",
-                    attrs={"src": youtube_embed_url},
-                )
-            else:
-                video_extension = os.path.splitext(source)[1].lower()
-                video_type = {
-                    ".mp4": "mp4",
-                    ".mov": "mp4",
-                    ".ogg": "ogg",
-                    ".webm": "webm",
-                }.get(video_extension)
-                if video_type:
-                    video_tag.append(
-                        Tag(
-                            name="source",
-                            attrs={"src": source, "type": f"video/{video_type}"},
-                        )
-                    )
-        section_html.append(youtube_video_tag or video_tag)
+        video_tag = get_video_tag(unit.sources)
+        section_html.append(video_tag)
         self.append_to_body(section_html)
 
     def on_rawhtml(self, unit: units.RawHtml) -> None:
@@ -150,6 +130,38 @@ iframe {
 }
 """
         self.document.html.head.append(css)
+
+
+def get_video_tag(sources: list[str]) -> BeautifulSoup:
+    """
+    Return either a <video> or <iframe> element based on the video sources.
+    """
+    video_tag = Tag(name="video", attrs={"controls": None})
+    for source in sources:
+        if youtube_embed_url := youtube.get_embed_url(source):
+            # Video url points to youtube. In such a case, we don't return a <video> but an iframe.
+            return Tag(
+                name="iframe",
+                attrs={"src": youtube_embed_url},
+            )
+        # Video is standard html5
+        video_extension = os.path.splitext(source)[1].lower()
+        video_type = {
+            ".mp4": "mp4",
+            ".mov": "mp4",
+            ".ogg": "ogg",
+            ".webm": "webm",
+        }.get(video_extension)
+        if video_type:
+            video_tag.append(
+                Tag(
+                    name="source",
+                    attrs={"src": source, "type": f"video/{video_type}"},
+                )
+            )
+        else:
+            logger.warning("Unsupported video extension: %s", video_extension)
+    return video_tag
 
 
 def beautiful_soup(contents: str) -> BeautifulSoup:

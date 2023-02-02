@@ -6,6 +6,7 @@ class Unit:
     A generic course unit.
 
     A course unit is a tree structure, where each element can have arbitrary attributes.
+    All units also have a title and key/value attributes.
     """
 
     def __init__(
