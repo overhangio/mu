@@ -1,6 +1,6 @@
-# 𝝁 🌊 the course authoring tool for humans
+# 𝝁 🌊 course authoring for humans
 
-Mu is a tool for writing online courses in a human-friendly format and converting them to formats that can be understood by common learning management systems ([LMS](https://en.wikipedia.org/wiki/Learning_management_system)). In particular, Mu can convert courses from Markdown to Open edX Learning XML ([OLX](https://edx.readthedocs.io/projects/edx-open-learning-xml/)).
+Mu is for authors of online courses. It allows you to cross-compile courses from one format to another. For instance, you can write your courses in a human-friendly format, such as Markdown, and convert them to a format that can be imported in your learning management system ([LMS](https://en.wikipedia.org/wiki/Learning_management_system)).
 
 ⚠ This work is still in the alpha stage! Do not report issues just yet. ⚠
 
