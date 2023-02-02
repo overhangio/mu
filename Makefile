@@ -40,7 +40,7 @@ example-html: ## Generate HTML example from the markdown file
 example-olx: ## Generate OLX example from the markdown file
 	rm -rf examples/olx/*
 	lecture -v examples/course.md examples/olx/
-	tar -czf examples/olx.tar.gz examples/olx
+	tar --mtime='UTC 2023-01-01' -czf examples/olx.tar.gz examples/olx
 
 ###### Additional commands
 
