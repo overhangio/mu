@@ -25,7 +25,7 @@ class Writer(BaseWriter):
             # Write all xml files
             write_xml(unit_xml, os.path.join(path, unit_path), makedirs=True)
 
-    def on_unit(self, unit: units.Unit) -> None:
+    def on_collection(self, unit: units.Collection) -> None:
         self.process_top_level_unit(unit)
 
     def on_course(self, unit: units.Course) -> None:

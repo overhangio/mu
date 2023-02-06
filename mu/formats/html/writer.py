@@ -38,7 +38,7 @@ class UnstyledWriter(BaseWriter):
             tag.string = title
         return tag
 
-    def on_unit(self, unit: units.Unit) -> None:
+    def on_collection(self, unit: units.Collection) -> None:
         self.append_to_body(self.get_header(unit))
 
     def on_course(self, unit: units.Course) -> None:

@@ -56,11 +56,18 @@ class HtmlReaderTests(unittest.TestCase):
         course = reader.read()
         self.assertEqual("title 1", course.title)
         self.assertEqual(2, len(course.children))
+
+        assert isinstance(course.children[0], units.Collection)
         self.assertEqual("title 2.1", course.children[0].title)
         self.assertEqual(0, len(course.children[0].children))
+
+        assert isinstance(course.children[1], units.Collection)
         self.assertEqual("title 2.2", course.children[1].title)
-        self.assertEqual("title 3", course.children[1].children[0].title)
         self.assertEqual(1, len(course.children[1].children))
+
+        assert isinstance(course.children[1].children[0], units.Collection)
+        self.assertEqual("title 3", course.children[1].children[0].title)
+        self.assertEqual(0, len(course.children[1].children[0].children))
 
     def test_video(self) -> None:
         reader = StringReader(
@@ -123,8 +130,8 @@ class HtmlReaderTests(unittest.TestCase):
 </section>
 """
         )
-        unit = list(reader.parse())[0]
-        video = unit.children[0]
+        course = reader.read()
+        video = course.children[0]
         assert isinstance(video, units.Video)
         self.assertEqual(["https://www.youtube.com/watch?v=dQw4w9WgXcQ"], video.sources)
 
@@ -136,7 +143,7 @@ class HtmlReaderTests(unittest.TestCase):
 <p>Paragraph 2</p>
 """
         )
-        course = list(reader.parse())[0]
+        course = reader.read()
         self.assertEqual(1, len(course.children))
         child = course.children[0]
         assert isinstance(child, units.RawHtml)
@@ -166,8 +173,8 @@ class HtmlReaderTests(unittest.TestCase):
         assert isinstance(child, units.RawHtml)
         self.assertEqual(
             {
-                "data-attr1": "val1",
-                "data-attr3": "val3",
+                "attr1": "val1",
+                "attr3": "val3",
             },
             child.attributes,
         )

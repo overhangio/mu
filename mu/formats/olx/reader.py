@@ -28,23 +28,38 @@ class InlineReader(BaseReader):
             return
 
         # Dispatch call to on_* functions
-        for unit in self.dispatch(self.unit_xml.name, self.unit_xml):
-            # Parse children
-            for child_xml in self.unit_xml.children:
-                reader = self.get_child_reader(child_xml)
-                for child in reader.parse():
-                    unit.add_child(child)
-            yield unit
+        yield from self.dispatch(self.unit_xml.name, self.unit_xml)
+
+    def parse_children(self) -> t.Iterable[units.Unit]:
+        # Parse children
+        for child_xml in self.unit_xml.children:
+            reader = self.get_child_reader(child_xml)
+            yield from reader.parse()
+
+    def _on_collection(
+        self, unit_xml: BeautifulSoup, collection: t.Optional[units.Collection] = None
+    ) -> t.Iterable[units.Unit]:
+        """
+        Dispatch function for course, chapter, sequential and vertical units.
+        """
+        if collection is None:
+            collection = units.Collection(
+                get_unit_attributes(unit_xml),
+                title=unit_xml.attrs.get("display_name", ""),
+            )
+        for child in self.parse_children():
+            collection.add_child(child)
+        yield collection
 
     def on_course(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
-        yield units.Course(
+        course = units.Course(
             get_unit_attributes(unit_xml), title=unit_xml.attrs.get("display_name", "")
         )
+        yield from self._on_collection(unit_xml, course)
 
-    def on_chapter(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
-        yield units.Unit(
-            get_unit_attributes(unit_xml), title=unit_xml.attrs.get("display_name", "")
-        )
+    on_chapter = _on_collection
+    on_sequential = _on_collection
+    on_vertical = _on_collection
 
     def on_problem(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
         """
@@ -79,16 +94,6 @@ class InlineReader(BaseReader):
                 question=question,
                 answers=ftq_answers,
             )
-
-    def on_sequential(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
-        yield units.Unit(
-            get_unit_attributes(unit_xml), title=unit_xml.attrs.get("display_name", "")
-        )
-
-    def on_vertical(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
-        yield units.Unit(
-            get_unit_attributes(unit_xml), title=unit_xml.attrs.get("display_name", "")
-        )
 
     def on_html(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
         """

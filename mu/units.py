@@ -1,26 +1,25 @@
 import typing as t
 
+U = t.TypeVar("U", bound="Unit")
+
 
 class Unit:
     """
     A generic course unit.
 
-    A course unit is a tree structure, where each element can have arbitrary attributes.
-    All units also have a title and key/value attributes.
+    All units have an optional title and key/value attributes.
+
+    Courses follow a tree structure. Units which are not containers are terminal leaves.
+    Every unit (except the top-level one) has a parent which is an instance of a
+    Collection.
     """
 
     def __init__(
         self, attributes: t.Optional[t.Dict[str, str]] = None, title: str = ""
     ):
         self.attributes = attributes or {}
-        self.children: t.List[Unit] = []
-        self.parent: t.Optional[Unit] = None
+        self.parent: t.Optional["Collection"] = None
         self.title = title
-
-    def add_child(self, unit: "Unit") -> "Unit":
-        unit.parent = self
-        self.children.append(unit)
-        return unit
 
     @property
     def depth(self) -> int:
@@ -29,9 +28,29 @@ class Unit:
         return self.parent.depth + 1
 
 
-class Course(Unit):
+class Collection(Unit):
+    """
+    A special type of Unit which can include children units.
+    """
+
+    def __init__(
+        self, attributes: t.Optional[t.Dict[str, str]] = None, title: str = ""
+    ):
+        super().__init__(attributes=attributes, title=title)
+        self.children: t.List[Unit] = []
+
+    def add_child(self, unit: U) -> U:
+        unit.parent = self
+        self.children.append(unit)
+        return unit
+
+
+class Course(Collection):
     """
     Top-level element of a course.
+
+    For now there is nothing special about this unit, but we may add extra properties in
+    the future.
     """
 
 

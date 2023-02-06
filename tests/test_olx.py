@@ -14,7 +14,7 @@ class OlxReaderTests(unittest.TestCase):
 </chapter>"""
         )
         chapter = list(reader.parse())[0]
-        assert chapter is not None
+        assert isinstance(chapter, units.Collection)
         self.assertEqual("hello world", chapter.title)
         self.assertEqual("chapter", chapter.attributes["olx-type"])
         self.assertEqual("My little sequential", chapter.children[0].title)
@@ -61,7 +61,9 @@ class OlxWriterTests(unittest.TestCase):
         course = self.build_course()
         unit1 = course.add_child(units.Unit())
         unit2 = course.add_child(units.Unit())
-        unit3 = course.add_child(units.Unit(attributes={"olx-url_name": "someurl"}))
+        unit3 = course.add_child(
+            units.Collection(attributes={"olx-url_name": "someurl"})
+        )
         unit4 = unit3.add_child(units.Unit())
 
         course_url_name = w.get_url_name_hash(course)
@@ -109,10 +111,10 @@ class OlxWriterTests(unittest.TestCase):
 
     def test_video_with_title(self) -> None:
         course = self.build_course(title="course")
-        chapter = course.add_child(units.Unit(title="chapter"))
-        sequential = chapter.add_child(units.Unit(title="sequential"))
-        vertical = sequential.add_child(units.Unit(title="vertical"))
-        video_title = vertical.add_child(units.Unit(title="video"))
+        chapter = course.add_child(units.Collection(title="chapter"))
+        sequential = chapter.add_child(units.Collection(title="sequential"))
+        vertical = sequential.add_child(units.Collection(title="vertical"))
+        video_title = vertical.add_child(units.Collection(title="video"))
         _video = video_title.add_child(units.Video())
         writer = w.Writer()
         writer.write(course)

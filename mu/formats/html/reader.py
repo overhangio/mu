@@ -22,34 +22,87 @@ class HtmlReader(BaseReader):
 
     def parse(self) -> t.Iterable[units.Unit]:
         """
-        In this method we only detect the headers. Parsing the actual content of each
-        unit is done in the `on_header` method.
+        Parse the html content.
 
-        This method is called recursively.
+        The dispatch method is called recursively by the child `on_header` method.
         """
-        header_level = None
-        if getattr(self.unit_html, "name"):
-            header_level = get_header_level(self.unit_html.name)
+        yield from self.iter_units(self.unit_html)
 
-        # Parse html
-        for unit in self.dispatch(self.unit_html.name, self.unit_html):
-            # Find the next header from which we start parsing again
-            for next_html in self.unit_html.find_next_siblings():
-                if next_header_level := get_header_level(next_html.name):
-                    if header_level is None:
-                        # Current unit did not have a header
-                        break
-                    if next_header_level == header_level + 1:
-                        # Next level, create a child reader, parse
-                        child_reader = HtmlReader(next_html)
-                        for child in child_reader.parse():
+    def iter_units(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
+        yield from super().dispatch(unit_html.name, unit_html)
+
+    def on_header(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
+        """
+        Parse `<h1>, ...<h6>` DOM elements.
+
+        This method yields a single Collection for the current header. Headers from
+        level n+1 will be added as children, provided they are direct children.
+
+        This method is a little difficult to read. The problem with html headers is
+        that they break the concept of parent -> child inclusion. So children in the
+        sense of a course are actually siblings in the html world, and we need to figure
+        out which ones are direct children of the current unit.
+        """
+        header_level = get_header_level(unit_html.name)
+        assert header_level is not None
+
+        # Create collection unit
+        UnitClass = units.Course if header_level == 1 else units.Collection
+        unit: units.Collection = UnitClass(
+            attributes=get_data_attributes(unit_html),
+            title=unit_html.string.strip(),
+        )
+
+        # Find children units.
+        siblings_are_children = True
+        for child_html in unit_html.find_next_siblings():
+            if not getattr(child_html, "name"):
+                # Ignore raw strings
+                continue
+            if child_header_level := get_header_level(child_html.name):
+                # Header found: all other siblings are actually children of another unit
+                if child_header_level < header_level:
+                    # Child is actually a parent header: stop searching for children
+                    # Parent header will be parsed in the parent call.
+                    break
+                elif child_header_level == header_level:
+                    # Child is a header with the same level:
+                    # Stop parsing and yield from a different parser.
+                    break
+                elif child_header_level == header_level + 1:
+                    # Direct child -> will be appended to children
+                    for child in self.iter_units(child_html):
+                        unit.add_child(child)
+                    # Other siblings are no longer children of this unit
+                    siblings_are_children = False
+                else:
+                    # Child is a grand-child, so we ignore it
+                    continue
+            else:
+                if siblings_are_children:
+                    # Found a non-header unit: append to children
+                    # (and concatenate RawHtml units in the process)
+                    for child in self.iter_units(child_html):
+                        if (
+                            unit.children
+                            and isinstance(unit.children[-1], units.RawHtml)
+                            and isinstance(child, units.RawHtml)
+                        ):
+                            # Concatenate all RawHtml children
+                            unit.children[-1].concatenate(child)
+                        else:
+                            # Append child
                             unit.add_child(child)
-                    elif next_header_level <= header_level:
-                        # We found a header with the same level or a parent unit. All
-                        # subsequent items belong to it. We stop parsing.
-                        break
-            # Unit is yielded after we have added its children
-            yield unit
+
+        # Yield current unit
+        yield unit
+
+    on_h1 = on_header
+    on_h2 = on_header
+    on_h3 = on_header
+    on_h4 = on_header
+    on_h5 = on_header
+    on_h6 = on_header
 
     def on_section(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
         """
@@ -70,61 +123,13 @@ class HtmlReader(BaseReader):
         else:
             logger.warning("Unit type is unsupported by HTML reader: %s", unit_type)
 
-    def on_header(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
-        """
-        Parse `<h1>, ...<h6>` DOM elements.
-        """
-        # Create unit
-        UnitClass = units.Course if unit_html.name == "h1" else units.Unit
-        attributes = {
-            k[5:]: v for k, v in unit_html.attrs.items() if k.startswith("data-")
-        }
-        unit: units.Unit = UnitClass(attributes, title=self.unit_html.string.strip())
-
-        # Find children
-        children = []
-        for child_html in unit_html.find_next_siblings():
-            if not getattr(child_html, "name"):
-                # Skip raw string
-                continue
-            elif get_header_level(child_html.name) is not None:
-                # Child is a header: stop processing
-                break
-            for child in self.dispatch(child_html.name, child_html):
-                children.append(child)
-
-        for child in children:
-            if (
-                isinstance(child, units.RawHtml)
-                and unit.children
-                and isinstance(unit.children[-1], units.RawHtml)
-            ):
-                # Concatenate all RawHtml children
-                unit.children[-1].concatenate(child)
-            else:
-                # Append child
-                unit.add_child(child)
-
-        yield unit
-
-    on_h1 = on_header
-    on_h2 = on_header
-    on_h3 = on_header
-    on_h4 = on_header
-    on_h5 = on_header
-    on_h6 = on_header
-
     def _on_html(self, unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
         """
         All data-* attributes are copied to the RawHtml unit.
         """
         yield units.RawHtml(
             contents=str(unit_html),
-            attributes={
-                key: value
-                for key, value in unit_html.attrs.items()
-                if key.startswith("data-")
-            },
+            attributes=get_data_attributes(unit_html),
         )
 
     # Add here all html elements that should be converted to RawHtml
@@ -177,6 +182,17 @@ def get_header_level(h: str) -> t.Optional[int]:
     if not match:
         return None
     return int(match.group(1))
+
+
+def get_data_attributes(unit_html: BeautifulSoup) -> t.Dict[str, str]:
+    """
+    Return all attributes that start with "data-"
+    """
+    return {
+        key[5:]: value
+        for key, value in unit_html.attrs.items()
+        if key.startswith("data-")
+    }
 
 
 def process_mcq(unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:

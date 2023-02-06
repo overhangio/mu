@@ -11,12 +11,13 @@ class BaseWriter:
         on_func(unit)
 
         # Write children recursively: depth-first traversal
-        for child in unit.children:
-            self.write(child)
+        if isinstance(unit, units.Collection):
+            for child in unit.children:
+                self.write(child)
 
         return self
 
-    def on_unit(self, unit: units.Unit) -> None:
+    def on_collection(self, unit: units.Collection) -> None:
         pass
 
     def on_course(self, unit: units.Course) -> None:
