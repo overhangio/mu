@@ -10,8 +10,8 @@ upgrade-requirements: ## Upgrade requirements files
 	pip-compile --upgrade requirements/base.in
 	pip-compile --upgrade requirements/dev.in
 
-tests: test-lint test-unit test-types test-format ## Run all tests
-.PHONY := tests
+test: test-lint test-unit test-types test-format ## Run all tests
+.PHONY := test
 
 test-lint: ## Run linting tests
 	pylint --errors-only --enable=unused-import,unused-argument mu tests setup.py
