@@ -2,8 +2,6 @@
 
 Mu is for authors of online courses. It allows you to cross-compile courses from one format to another. For instance, you can write your courses in a human-friendly format, such as Markdown, and convert them to a format that can be imported in your learning management system ([LMS](https://en.wikipedia.org/wiki/Learning_management_system)).
 
-⚠ This work is still in the alpha stage! Do not report issues just yet. ⚠
-
 Supported formats:
 
 - [Markdown](https://daringfireball.net/projects/markdown/): with [Pandoc-flavoured](https://garrettgman.github.io/rmarkdown/authoring_pandoc_markdown.html) header attributes.
