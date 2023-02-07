@@ -22,8 +22,10 @@ jobs:
       # Install requirements
       - name: Install package
         run: pip install -e .
-      - name: Install requirements
+      - name: Install Python requirements
         run: pip install -r requirements/dev.txt
+      - name: Install system requirements
+        run: sudo apt install pandoc
 
       # Run tests
       - name: Run tests
