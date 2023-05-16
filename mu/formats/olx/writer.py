@@ -93,6 +93,8 @@ class Writer(BaseWriter):
                 attrs={"answer": answer},
             )
             response_xml.append(answer_xml)
+        textline_xml = Tag(name="textline",attrs={"size":unit.size})
+        response_xml.append(textline_xml)    
         problem_xml.append(response_xml)
 
     def on_rawhtml(self, unit: units.RawHtml) -> None:

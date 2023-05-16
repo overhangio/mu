@@ -83,6 +83,7 @@ class FreeTextQuestion(MultipleChoiceQuestion):
         answers: t.Optional[t.List[str]] = None,
     ):
         answers = answers or []
+        self.size = max((len(a) for a in answers)) if answers else 0
         super().__init__(
             attributes=attributes,
             title=title,
