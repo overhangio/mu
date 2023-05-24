@@ -77,7 +77,21 @@ class Writer(BaseWriter):
         response_xml.append(responsegroup_xml)
         problem_xml.append(response_xml)
 
-    def on_freetextquestion(self, unit: units.MultipleChoiceQuestion) -> None:
+    def on_poll(self, unit: units.Poll) -> None:
+        """
+        https://edx.readthedocs.io/projects/open-edx-building-and-running-a-course/en/latest/exercises_tools/poll_question.html
+        """
+        self.process_single_tag_block(unit=unit, unit_type="poll")
+
+    def on_survey(self, unit: units.Survey) -> None:
+        """
+        https://edx.readthedocs.io/projects/open-edx-building-and-running-a-course/en/latest/exercises_tools/survey.html
+        """
+        self.process_single_tag_block(
+            unit=unit, unit_type="survey", title_attribute="block_name"
+        )
+
+    def on_freetextquestion(self, unit: units.FreeTextQuestion) -> None:
         """
         https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/problem-xml/text_input.html
         """
@@ -184,6 +198,32 @@ class Writer(BaseWriter):
             parent = parent.parent
 
         return unit_xml
+
+    def process_single_tag_block(
+        self, unit: units.Unit, unit_type: str, title_attribute: str = "display_name"
+    ) -> Tag:
+        # Get/Generate url_name
+        url_name = get_url_name(unit)
+
+        # <unit_type>/<url_name>.xml
+        display_name = unit.title
+        if not display_name and unit.parent:
+            # Borrow the title from the above unit
+            display_name = unit.parent.title
+        unit_xml = Tag(name=unit_type, attrs={title_attribute: display_name})
+        unit_xml.attrs.update(unit.attributes)
+        unit_xml.attrs["url_name"] = url_name
+
+        self.unit_xml[unit] = unit_xml
+
+        # Find the nearest parent for which we have created an xml element
+        parent = unit.parent
+        while parent is not None:
+            # Append <type url_name="..."> to that parent (if any)
+            if parent_xml := self.unit_xml.get(parent):
+                parent_xml.append(unit_xml)
+                break
+            parent = parent.parent
 
 
 def get_url_name(unit: units.Unit) -> str:
