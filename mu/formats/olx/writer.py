@@ -2,6 +2,7 @@ import hashlib
 import logging
 import os
 import typing as t
+import json
 
 from bs4 import BeautifulSoup, Tag
 
@@ -81,15 +82,41 @@ class Writer(BaseWriter):
         """
         https://edx.readthedocs.io/projects/open-edx-building-and-running-a-course/en/latest/exercises_tools/poll_question.html
         """
-        self.process_single_tag_block(unit=unit, unit_type="poll")
+        problem_xml = self.process_single_tag_block(unit=unit, unit_type="poll")
+        problem_xml.attrs["question"] = unit.question
+        problem_xml.attrs["answers"] = json.dumps(
+            [
+                [
+                    a.lower().replace(" ", "_"),
+                    {"img": "", "img_alt": "", "label": a},
+                ]
+                for a in unit.answers
+            ],
+            indent=4,
+        )
+        problem_xml.attrs["feedback"] = unit.feedback
 
     def on_survey(self, unit: units.Survey) -> None:
         """
         https://edx.readthedocs.io/projects/open-edx-building-and-running-a-course/en/latest/exercises_tools/survey.html
         """
-        self.process_single_tag_block(
+        problem_xml = self.process_single_tag_block(
             unit=unit, unit_type="survey", title_attribute="block_name"
         )
+        problem_xml.attrs["questions"] = json.dumps(
+            [
+                [
+                    q.lower().replace(" ", "_"),
+                    {"img": "", "img_alt": "", "label": q},
+                ]
+                for q in unit.questions
+            ],
+            indent=4,
+        )
+        problem_xml.attrs["answers"] = json.dumps(
+            [[a.lower().replace(" ", "_"), a] for a in unit.answers], indent=4
+        )
+        problem_xml.attrs["feedback"] = unit.feedback
 
     def on_freetextquestion(self, unit: units.FreeTextQuestion) -> None:
         """
@@ -212,6 +239,7 @@ class Writer(BaseWriter):
             display_name = unit.parent.title
         unit_xml = Tag(name=unit_type, attrs={title_attribute: display_name})
         unit_xml.attrs.update(unit.attributes)
+
         unit_xml.attrs["url_name"] = url_name
 
         self.unit_xml[unit] = unit_xml
@@ -224,6 +252,8 @@ class Writer(BaseWriter):
                 parent_xml.append(unit_xml)
                 break
             parent = parent.parent
+
+        return unit_xml
 
 
 def get_url_name(unit: units.Unit) -> str:

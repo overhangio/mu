@@ -58,9 +58,9 @@ How many legs does a healthy snake have?
 
 #### Survey
  
-::: {mu-type=survey private_results=true max_submissions=10}
+::: {mu-type=survey}
 
-#### My Survey
+#### My Survey {private_results=true max_submissions=10}
 
 Question 1
 
@@ -76,9 +76,9 @@ Question 3
 
 :::
 
-::: {mu-type=poll private_results=true max_submissions=10}
+::: {mu-type=poll}
 
-#### My Poll
+#### My Poll {private_results=true max_submissions=10}
 
 Can you see this poll example?
  

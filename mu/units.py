@@ -98,7 +98,7 @@ class FreeTextQuestion(MultipleChoiceQuestion):
 class Poll(Unit):
     def __init__(
         self,
-        attributes: t.Optional[t.Dict[str, str]] = None,
+        attributes: t.Dict[str, str] = dict(),
         title: str = "",
         question: str = "",
         answers: t.Optional[t.List[str]] = None,
@@ -107,49 +107,18 @@ class Poll(Unit):
         """
         Voting type question with 1 question and multiple answers.
         """
-        attrs = {
-            "feedback": "",
-            "private_results": "false",
-            "max_submissions": "1",
-            "feedback": feedback,
-        }
-        accepted_attrs = ("url_name", "private_results", "max_submissions")
-        ignored_attrs = ("id", "mu-type")
-        if attributes:
-            for attribute, value in attributes.items():
-                attr_name = attribute.replace("data-", "", 1)
-                if attr_name in accepted_attrs:
-                    attrs[attr_name] = value
-                elif attr_name not in ignored_attrs:
-                    logger.warning(
-                        f" {attr_name} attribute is unsupported by {self.__class__.__name__}."
-                    )
+        self.feedback = feedback
+        self.question = question
+        attributes["xblock-family"] = "xblock.v1"
+        self.answers = answers or []
 
-        attrs["question"] = question
-        answers = answers or []
-        attrs["xblock-family"] = "xblock.v1"
-        attrs["answers"] = (
-            json.dumps(
-                [
-                    [
-                        a.lower().replace(" ", "_"),
-                        {"img": "", "img_alt": "", "label": a},
-                    ]
-                    for a in answers
-                ],
-                indent=4,
-            )
-            if answers
-            else ""
-        )
-
-        super().__init__(attributes=attrs, title=title)
+        super().__init__(attributes=attributes, title=title)
 
 
 class Survey(Unit):
     def __init__(
         self,
-        attributes: t.Dict[str, str] | None = None,
+        attributes: t.Dict[str, str] = dict(),
         title: str = "",
         answers: t.Optional[t.List[str]] = None,
         questions: t.Optional[t.List[str]] = None,
@@ -158,46 +127,12 @@ class Survey(Unit):
         """
         Multiple  questions with multiple choices common for all the questions.
         """
-        attrs = {
-            "feedback": "",
-            "private_results": "false",
-            "max_submissions": "1",
-            "feedback": feedback,
-        }
-        accepted_attrs = ("url_name", "private_results", "max_submissions")
-        ignored_attrs = ("id", "mu-type")
-        if attributes:
-            for attribute, value in attributes.items():
-                attr_name = attribute.replace("data-", "", 1)
-                if attr_name in accepted_attrs:
-                    attrs[attr_name] = value
-                elif attr_name not in ignored_attrs:
-                    logger.warning(
-                        f" {attr_name} attribute is unsupported by {self.__class__.__name__}."
-                    )
+        self.questions = questions or []
+        self.feedback = feedback
+        attributes["xblock-family"] = "xblock.v1"
+        self.answers = answers or []
 
-        attrs["questions"] = (
-            json.dumps(
-                [
-                    [
-                        q.lower().replace(" ", "_"),
-                        {"img": "", "img_alt": "", "label": q},
-                    ]
-                    for q in questions
-                ],
-                indent=4,
-            )
-            if questions
-            else ""
-        )
-
-        answers = answers or []
-        attrs["xblock-family"] = "xblock.v1"
-        attrs["answers"] = (
-            json.dumps([[a.lower().replace(" ", "_"), a] for a in answers], indent=4)
-            or ""
-        )
-        super().__init__(attributes=attrs, title=title)
+        super().__init__(attributes=attributes, title=title)
 
 
 class RawHtml(Unit):
