@@ -76,7 +76,7 @@ Question 3
 
 :::
 
-::: {mu-type=poll}
+::: {mu-type=survey}
 
 #### My Poll {private_results=true max_submissions=10}
 

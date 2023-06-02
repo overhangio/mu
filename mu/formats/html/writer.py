@@ -114,33 +114,6 @@ class UnstyledWriter(BaseWriter):
 
         self.append_to_body(section_html)
 
-    def on_poll(self, unit: units.Poll) -> None:
-        section_html = Tag(name="section", attrs={TYPE_ATTR: "poll"})
-
-        # Write title
-        section_html.append(self.get_header(unit))
-
-        # Write question
-        question_html = Tag(name="p")
-        question_html.string = unit.question
-        section_html.append(question_html)
-
-        answers_html = Tag(name="ul")
-
-        # Write answers
-        for answer in unit.answers:
-            answer_html = Tag(name="li")
-            answer_html.string = answer
-            answers_html.append(answer_html)
-        section_html.append(answers_html)
-
-        # Write Feedback
-        feedback_html = Tag(name="code")
-        feedback_html.string = unit.feedback
-        section_html.append(feedback_html)
-
-        self.append_to_body(section_html)
-
     def on_video(self, unit: units.Video) -> None:
         """
         We parse the video sources. If one is youtube, we include a youtube iframe.

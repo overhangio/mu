@@ -95,26 +95,6 @@ class FreeTextQuestion(MultipleChoiceQuestion):
         )
 
 
-class Poll(Unit):
-    def __init__(
-        self,
-        attributes: t.Dict[str, str] = dict(),
-        title: str = "",
-        question: str = "",
-        answers: t.Optional[t.List[str]] = None,
-        feedback: str = "",
-    ):
-        """
-        Voting type question with 1 question and multiple answers.
-        """
-        self.feedback = feedback
-        self.question = question
-        attributes["xblock-family"] = "xblock.v1"
-        self.answers = answers or []
-
-        super().__init__(attributes=attributes, title=title)
-
-
 class Survey(Unit):
     def __init__(
         self,

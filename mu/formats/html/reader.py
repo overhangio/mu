@@ -123,9 +123,6 @@ class HtmlReader(BaseReader):
         elif unit_type == "survey":
             # Survey questionaire
             yield from process_survey(unit_html)
-        elif unit_type == "poll":
-            # Poll question
-            yield from process_poll(unit_html)
         else:
             logger.warning("Unit type is unsupported by HTML reader: %s", unit_type)
 
@@ -243,21 +240,6 @@ def process_survey(unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
     yield units.Survey(
         title=title,
         questions=questions,
-        answers=answers,
-        feedback=feedback,
-        attributes={
-            attr.replace("data-", "", 1): val
-            for attr, val in unit_html.find(re.compile("^h[1-6]$")).attrs.items()
-        },
-    )
-
-
-def process_poll(unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
-    title, question, answers = get_question_answers(unit_html)
-    feedback = unit_html.find("code").string.strip() if unit_html.find("code") else ""
-    yield units.Poll(
-        title=title,
-        question=question,
         answers=answers,
         feedback=feedback,
         attributes={

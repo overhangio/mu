@@ -78,44 +78,36 @@ class Writer(BaseWriter):
         response_xml.append(responsegroup_xml)
         problem_xml.append(response_xml)
 
-    def on_poll(self, unit: units.Poll) -> None:
-        """
-        https://edx.readthedocs.io/projects/open-edx-building-and-running-a-course/en/latest/exercises_tools/poll_question.html
-        """
-        problem_xml = self.process_single_tag_block(unit=unit, unit_type="poll")
-        problem_xml.attrs["question"] = unit.question
-        problem_xml.attrs["answers"] = json.dumps(
-            [
-                [
-                    a.lower().replace(" ", "_"),
-                    {"img": "", "img_alt": "", "label": a},
-                ]
-                for a in unit.answers
-            ],
-            indent=4,
-        )
-        problem_xml.attrs["feedback"] = unit.feedback
-
     def on_survey(self, unit: units.Survey) -> None:
         """
         https://edx.readthedocs.io/projects/open-edx-building-and-running-a-course/en/latest/exercises_tools/survey.html
         """
-        problem_xml = self.process_single_tag_block(
-            unit=unit, unit_type="survey", title_attribute="block_name"
-        )
-        problem_xml.attrs["questions"] = json.dumps(
+        title_attribute = "display_name"
+        unit_type = "poll" if len(unit.questions) < 2 else "survey"
+        attrs = dict()
+        make_dict: t.Callable[
+            [t.List[str]], t.List[t.List[str | t.Dict[str, str]]]
+        ] = lambda x: [
             [
-                [
-                    q.lower().replace(" ", "_"),
-                    {"img": "", "img_alt": "", "label": q},
-                ]
-                for q in unit.questions
-            ],
-            indent=4,
+                y.lower().replace(" ", "_"),
+                {"img": "", "img_alt": "", "label": y},
+            ]
+            for y in x
+        ]
+        if unit_type == "survey":
+            title_attribute = "block_name"
+            attrs["questions"] = json.dumps(make_dict(unit.questions), indent=4)
+            attrs["answers"] = json.dumps(
+                [[a.lower().replace(" ", "_"), a] for a in unit.answers], indent=4
+            )
+        else:
+            attrs["question"] = unit.questions[0] if unit.questions else ""
+            attrs["answers"] = json.dumps(make_dict(unit.answers), indent=4)
+
+        problem_xml = self.process_single_tag_block(
+            unit=unit, unit_type=unit_type, title_attribute=title_attribute
         )
-        problem_xml.attrs["answers"] = json.dumps(
-            [[a.lower().replace(" ", "_"), a] for a in unit.answers], indent=4
-        )
+        problem_xml.attrs.update(attrs)
         problem_xml.attrs["feedback"] = unit.feedback
 
     def on_freetextquestion(self, unit: units.FreeTextQuestion) -> None:
