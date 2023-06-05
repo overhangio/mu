@@ -1,0 +1,69 @@
+<vertical display_name="Survey">
+ <survey answers='[
+    [
+        "answer_1",
+        "Answer 1"
+    ],
+    [
+        "answer_2",
+        "Answer 2"
+    ],
+    [
+        "answer_3",
+        "Answer 3"
+    ]
+]' block_name="My Survey" feedback="This is your feedback text after submitting the survey." max_submissions="10" private_results="true" questions='[
+    [
+        "question_1",
+        {
+            "img": "",
+            "img_alt": "",
+            "label": "Question 1"
+        }
+    ],
+    [
+        "question_2",
+        {
+            "img": "",
+            "img_alt": "",
+            "label": "Question 2"
+        }
+    ],
+    [
+        "question_3",
+        {
+            "img": "",
+            "img_alt": "",
+            "label": "Question 3"
+        }
+    ]
+]' url_name="c00c90a1289c6f97a797d7f8a8b2df7e" xblock-family="xblock.v1">
+ </survey>
+ <poll answers='[
+    [
+        "yes",
+        {
+            "img": "",
+            "img_alt": "",
+            "label": "Yes"
+        }
+    ],
+    [
+        "no",
+        {
+            "img": "",
+            "img_alt": "",
+            "label": "No"
+        }
+    ],
+    [
+        "maybe",
+        {
+            "img": "",
+            "img_alt": "",
+            "label": "Maybe"
+        }
+    ]
+]' display_name="My Poll" feedback="This is your feedback text after submitting the poll." max_submissions="10" private_results="true" question="Can you see this poll example?" url_name="3ff7105da79eabe8a9adf96e98a0d6d7" xblock-family="xblock.v1">
+ </poll>
+</vertical>

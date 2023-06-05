@@ -45,6 +45,104 @@ class OlxReaderTests(unittest.TestCase):
         assert isinstance(html, units.RawHtml)
         self.assertEqual("<p>hello world!</p>", html.contents)
 
+    def test_poll(self) -> None:
+        reader = StringReader(
+            """<poll answers='[
+    [
+        "answer1",
+        {
+            "img": "",
+            "img_alt": "",
+            "label": "Answer1"
+        }
+    ],
+    [
+        "answer2",
+        {
+            "img": "",
+            "img_alt": "",
+            "label": "Answer2"
+        }
+    ]
+]' display_name="Poll" feedback="Feedback Text." max_submissions="10" private_results="true" question="Poll Question" xblock-family="xblock.v1"></poll>"""
+        )
+        poll = list(reader.parse())[0]
+        assert isinstance(poll, units.Survey)
+        self.assertListEqual(
+            poll.answers,
+            [
+                ["answer1", {"img": "", "img_alt": "", "label": "Answer1"}],
+                ["answer2", {"img": "", "img_alt": "", "label": "Answer2"}],
+            ],
+        )
+        self.assertListEqual(poll.questions, ["Poll Question"])
+        self.assertEqual(poll.feedback, "Feedback Text.")
+        self.assertDictEqual(
+            poll.attributes,
+            {
+                "display_name": "Poll",
+                "max_submissions": "10",
+                "private_results": "true",
+                "xblock-family": "xblock.v1",
+                "olx-type": "poll",
+            },
+        )
+
+    def test_survey(self) -> None:
+        reader = StringReader(
+            """<survey answers='[
+    [
+        "answer1",
+        "Answer1"
+    ],
+    [
+        "answer2",
+        "Answer2"
+    ]
+]' block_name="Survey" feedback="Feedback Text." max_submissions="10" private_results="true" questions='[
+    [
+        "question1",
+        {
+            "img": "",
+            "img_alt": "",
+            "label": "Question1"
+        }
+    ],
+    [
+        "question2",
+        {
+            "img": "",
+            "img_alt": "",
+            "label": "Question2"
+        }
+    ]
+]' xblock-family="xblock.v1"></survey>"""
+        )
+        survey = list(reader.parse())[0]
+        assert isinstance(survey, units.Survey)
+
+        self.assertListEqual(
+            survey.answers, [["answer1", "Answer1"], ["answer2", "Answer2"]]
+        )
+        self.assertListEqual(
+            survey.questions,
+            [
+                ["question1", {"img": "", "img_alt": "", "label": "Question1"}],
+                ["question2", {"img": "", "img_alt": "", "label": "Question2"}],
+            ],
+        )
+        self.assertEqual(survey.feedback, "Feedback Text.")
+        self.assertDictEqual(
+            survey.attributes,
+            {
+                "block_name": "Survey",
+                "max_submissions": "10",
+                "private_results": "true",
+                "xblock-family": "xblock.v1",
+                "olx-type": "survey",
+            },
+        )
+
 
 class OlxWriterTests(unittest.TestCase):
     def build_course(self, title: str = "") -> units.Course:
@@ -130,4 +228,58 @@ class OlxWriterTests(unittest.TestCase):
         self.assertEqual(
             os.path.join("html", w.get_url_name(html) + ".html"),
             str(writer.xml_paths[-1][1]),
+        )
+
+    def test_poll(self) -> None:
+        survey = units.Survey(
+            attributes={"private_results": "true", "max_submissions": "10"},
+            title="Poll",
+            answers=["Answer1", "Answer2", "Answer3"],
+            questions=["Poll Question"],
+            feedback="Feedback Text.",
+        )
+        writer = w.Writer()
+        writer.write(survey)
+        self.assertEqual(len(writer.unit_xml), 1)
+        poll_tag = [v for v in writer.unit_xml.values()][0]
+        poll_tag_attrs = poll_tag.attrs
+        poll_tag_attrs.pop("url_name", "")
+        self.assertDictEqual(
+            {
+                "display_name": "Poll",
+                "private_results": "true",
+                "max_submissions": "10",
+                "xblock-family": "xblock.v1",
+                "question": "Poll Question",
+                "answers": '[\n    [\n        "answer1",\n        {\n            "img": "",\n            "img_alt": "",\n            "label": "Answer1"\n        }\n    ],\n    [\n        "answer2",\n        {\n            "img": "",\n            "img_alt": "",\n            "label": "Answer2"\n        }\n    ],\n    [\n        "answer3",\n        {\n            "img": "",\n            "img_alt": "",\n            "label": "Answer3"\n        }\n    ]\n]',
+                "feedback": "Feedback Text.",
+            },
+            poll_tag_attrs,
+        )
+
+    def test_survey(self) -> None:
+        survey = units.Survey(
+            attributes={"private_results": "true", "max_submissions": "10"},
+            title="Survey",
+            answers=["Answer1", "Answer2"],
+            questions=["Question1", "Question2"],
+            feedback="Feedback Text.",
+        )
+        writer = w.Writer()
+        writer.write(survey)
+        self.assertEqual(len(writer.unit_xml), 1)
+        survey_tag = [v for v in writer.unit_xml.values()][0]
+        survey_tag_attrs = survey_tag.attrs
+        survey_tag_attrs.pop("url_name", "")
+        self.assertDictEqual(
+            {
+                "block_name": "Survey",
+                "private_results": "true",
+                "max_submissions": "10",
+                "xblock-family": "xblock.v1",
+                "questions": '[\n    [\n        "question1",\n        {\n            "img": "",\n            "img_alt": "",\n            "label": "Question1"\n        }\n    ],\n    [\n        "question2",\n        {\n            "img": "",\n            "img_alt": "",\n            "label": "Question2"\n        }\n    ]\n]',
+                "answers": '[\n    [\n        "answer1",\n        "Answer1"\n    ],\n    [\n        "answer2",\n        "Answer2"\n    ]\n]',
+                "feedback": "Feedback Text.",
+            },
+            survey_tag_attrs,
         )

@@ -120,6 +120,9 @@ class HtmlReader(BaseReader):
         elif unit_type == "ftq":
             # Free text question
             yield from process_ftq(unit_html)
+        elif unit_type == "survey":
+            # Survey questionaire
+            yield from process_survey(unit_html)
         else:
             logger.warning("Unit type is unsupported by HTML reader: %s", unit_type)
 
@@ -231,6 +234,18 @@ def process_ftq(unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
     yield units.FreeTextQuestion(title=title, question=question, answers=answers)
 
 
+def process_survey(unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
+    title, questions, answers = get_questions_answers(unit_html)
+    feedback = unit_html.find("code").string.strip() if unit_html.find("code") else ""
+    yield units.Survey(
+        title=title,
+        questions=questions,
+        answers=answers,
+        feedback=feedback,
+        attributes=get_data_attributes(unit_html.find(re.compile("^h[1-6]$"))),
+    )
+
+
 def process_video(unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
     """
     https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
@@ -286,6 +301,31 @@ def get_question_answers(unit_html: BeautifulSoup) -> t.Tuple[str, str, t.List[s
         answers.append(answer.strip())
 
     return title, question, answers
+
+
+def get_questions_answers(
+    unit_html: BeautifulSoup,
+) -> t.Tuple[str, t.List[str], t.List[str]]:
+    title = ""
+    if title_html := find_title(unit_html):
+        title = title_html.string
+
+    answers = []
+
+    ul_html = unit_html.find("ul")
+    if ul_html is None:
+        raise MuError(f"Missing <ul> element in multiple choice question: {unit_html}")
+    for li_html in ul_html.find_all("li"):
+        answer = li_html.string.strip()
+        answers.append(answer.strip())
+
+    questions = []
+    for q in unit_html.findAll("p"):
+        if "code" not in [c.name for c in q.children]:
+            questions.append(q.string.strip())
+    if len(questions) < 1:
+        raise MuError(f"Missing <p> element in survey: {unit_html}")
+    return title, questions, answers
 
 
 def find_title(unit_html: BeautifulSoup) -> t.Optional[BeautifulSoup]:
