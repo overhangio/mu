@@ -242,10 +242,7 @@ def process_survey(unit_html: BeautifulSoup) -> t.Iterable[units.Unit]:
         questions=questions,
         answers=answers,
         feedback=feedback,
-        attributes={
-            attr.replace("data-", "", 1): val
-            for attr, val in unit_html.find(re.compile("^h[1-6]$")).attrs.items()
-        },
+        attributes=get_data_attributes(unit_html.find(re.compile("^h[1-6]$"))),
     )
 
 
