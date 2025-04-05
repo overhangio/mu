@@ -6,7 +6,7 @@ Supported formats:
 
 - [Markdown](https://daringfireball.net/projects/markdown/): with [Pandoc-flavoured](https://garrettgman.github.io/rmarkdown/authoring_pandoc_markdown.html) header attributes.
 - HTML 5
-- Open Learning XML ([OLX](https://edx.readthedocs.io/projects/edx-open-learning-xml/)) from [Open edX](https://openedx.org).
+- Open Learning XML ([OLX](https://docs.openedx.org/en/latest/educators/navigation/olx.html)) from [Open edX](https://openedx.org).
 
 Check out the [course.md](https://github.com/overhangio/mu/blob/main/examples/course.md) file to see what an actual course in Markdown format looks like.
 
