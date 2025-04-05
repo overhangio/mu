@@ -63,8 +63,8 @@ class InlineReader(BaseReader):
 
     def on_problem(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
         """
-        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/problem-xml/checkbox.html
-        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/problem-xml/text_input.html
+        https://docs.openedx.org/en/latest/educators/references/course_development/exercise_tools/multi_select_xml.html
+        https://docs.openedx.org/en/latest/educators/references/course_development/exercise_tools/text_input_xml.html
         """
         # Parse question
         question_xml = unit_xml.find("label")
@@ -97,7 +97,7 @@ class InlineReader(BaseReader):
 
     def on_html(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
         """
-        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/components/html-components.html
+        https://docs.openedx.org/en/latest/educators/olx/components/html-components.html
         """
         contents = "\n".join([str(c) for c in unit_xml.contents])
         yield units.RawHtml(
@@ -106,7 +106,7 @@ class InlineReader(BaseReader):
 
     def on_video(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
         """
-        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/components/video-components.html
+        https://docs.openedx.org/en/latest/educators/olx/components/video-components.html
         """
         sources: t.List[str] = []
         if youtube_id := unit_xml.attrs.get("youtube_id_1_0"):

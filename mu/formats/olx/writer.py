@@ -55,10 +55,10 @@ class Writer(BaseWriter):
 
     def on_multiplechoicequestion(self, unit: units.MultipleChoiceQuestion) -> None:
         """
-        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/problem-xml/checkbox.html
+        https://docs.openedx.org/en/latest/educators/references/course_development/exercise_tools/multi_select_xml.html
 
         Note that we generate checkbox problems by default, and not multiple choice problem, which support only a single answer:
-        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/problem-xml/multiple_choice.html#multiple-choice-problem-olx-reference
+        https://docs.openedx.org/en/latest/educators/references/course_development/exercise_tools/single_select_xml.html
         """
         problem_xml = self.process_unit(unit, "problem")
         response_xml = Tag(name="choiceresponse")
@@ -79,7 +79,7 @@ class Writer(BaseWriter):
 
     def on_freetextquestion(self, unit: units.MultipleChoiceQuestion) -> None:
         """
-        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/problem-xml/text_input.html
+        https://docs.openedx.org/en/latest/educators/references/course_development/exercise_tools/text_input_xml.html
         """
         problem_xml = self.process_unit(unit, "problem")
         response_xml = Tag(name="stringresponse")
@@ -98,7 +98,7 @@ class Writer(BaseWriter):
 
     def on_rawhtml(self, unit: units.RawHtml) -> None:
         """
-        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/components/html-components.html
+        https://docs.openedx.org/en/latest/educators/olx/components/html-components.html
 
         Note that the spec is incorrect. We should use "filename" and not "file_name".
         """
@@ -120,7 +120,7 @@ class Writer(BaseWriter):
 
     def on_video(self, unit: units.Video) -> None:
         """
-        https://edx.readthedocs.io/projects/edx-open-learning-xml/en/latest/components/video-components.html
+        https://docs.openedx.org/en/latest/educators/olx/components/video-components.html
         """
         video_xml = self.process_unit(unit, "video")
         # We need to define an empty youtube url; otherwise the default video with Anant is picked up.
