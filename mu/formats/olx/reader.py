@@ -126,6 +126,46 @@ class InlineReader(BaseReader):
             sources=sources,
         )
 
+    def on_poll(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
+        import json
+
+        attributes: t.Dict[str, str] = unit_xml.attrs
+        attributes["olx-type"] = unit_xml.name
+        questions: t.List[str] = list()
+        questions.append(attributes.pop("question", ""))
+        try:
+            answers: t.List[str] = json.loads(attributes.pop("answers", "[]"))
+        except:
+            answers = list()
+        feedback: str = attributes.pop("feedback", "")
+        yield units.Survey(
+            questions=questions,
+            answers=answers,
+            feedback=feedback,
+            attributes=attributes,
+        )
+
+    def on_survey(self, unit_xml: BeautifulSoup) -> t.Iterable[units.Unit]:
+        import json
+
+        attributes: t.Dict[str, str] = unit_xml.attrs
+        attributes["olx-type"] = unit_xml.name
+        try:
+            questions: t.List[str] = json.loads(attributes.pop("questions", "[]"))
+        except:
+            questions = list()
+        try:
+            answers: t.List[str] = json.loads(attributes.pop("answers", "[]"))
+        except:
+            answers = list()
+        feedback: str = attributes.pop("feedback", "")
+        yield units.Survey(
+            questions=questions,
+            answers=answers,
+            feedback=feedback,
+            attributes=attributes,
+        )
+
 
 class StringReader(InlineReader):
     """

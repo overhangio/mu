@@ -91,6 +91,57 @@ class HtmlReaderTests(unittest.TestCase):
             video.sources,
         )
 
+    def test_survey(self) -> None:
+        reader = StringReader(
+            """
+<h1>Survey</h1>
+<section data-mu-type="survey">
+   <h2 data-max_submissions="10" data-private_results="true" data-xblock-family="xblock.v1">
+    My Survey
+   </h2>
+   <p>
+    Question1
+   </p>
+   <p>
+    Question2
+   </p>
+   <ul>
+    <li>
+     Answer1
+    </li>
+    <li>
+     Answer2
+    </li>
+   </ul>
+   <code>
+    Feedback Text.
+   </code>
+  </section>
+"""
+        )
+        course = reader.read()
+        survey = course.children[0]
+        self.assertEqual("My Survey", survey.title.strip(" \n"))
+        assert isinstance(survey, units.Survey)
+        self.assertListEqual(
+            ["Answer1", "Answer2"],
+            survey.answers,
+        )
+
+        self.assertListEqual(
+            ["Question1", "Question2"],
+            survey.questions,
+        )
+        self.assertEqual("Feedback Text.", survey.feedback)
+        self.assertDictEqual(
+            {
+                "max_submissions": "10",
+                "private_results": "true",
+                "xblock-family": "xblock.v1",
+            },
+            survey.attributes,
+        )
+
     def test_video_no_source(self) -> None:
         reader = StringReader(
             """
@@ -253,6 +304,51 @@ class HtmlWriterTests(unittest.TestCase):
         iframe = writer.document.find(name="iframe")
         self.assertEqual(
             "https://www.youtube.com/embed/dQw4w9WgXcQ", iframe.attrs["src"]
+        )
+
+    def test_survey(self) -> None:
+        writer = Writer()
+        writer.write(
+            units.Survey(
+                attributes={"private_results": "true", "max_submissions": "10"},
+                title="My Survey",
+                answers=["Answer1", "Answer2"],
+                questions=["Question1", "Question2"],
+                feedback="Feedback Text.",
+            )
+        )
+        output = writer.dumps()
+        self.assertEqual(
+            """<!DOCTYPE html>
+<html>
+ <head>
+ </head>
+ <body>
+  <section data-mu-type="survey">
+   <h1 data-max_submissions="10" data-private_results="true" data-xblock-family="xblock.v1">
+    My Survey
+   </h1>
+   <p>
+    Question1
+   </p>
+   <p>
+    Question2
+   </p>
+   <ul>
+    <li>
+     Answer1
+    </li>
+    <li>
+     Answer2
+    </li>
+   </ul>
+   <code>
+    Feedback Text.
+   </code>
+  </section>
+ </body>
+</html>""",
+            output,
         )
 
     def test_raw_html(self) -> None:

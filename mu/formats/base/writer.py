@@ -31,3 +31,6 @@ class BaseWriter:
 
     def on_rawhtml(self, unit: units.RawHtml) -> None:
         pass
+
+    def on_survey(self, unit: units.Survey) -> None:
+        pass

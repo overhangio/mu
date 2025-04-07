@@ -2,6 +2,7 @@ import hashlib
 import logging
 import os
 import typing as t
+import json
 
 from bs4 import BeautifulSoup, Tag
 
@@ -77,7 +78,39 @@ class Writer(BaseWriter):
         response_xml.append(responsegroup_xml)
         problem_xml.append(response_xml)
 
-    def on_freetextquestion(self, unit: units.MultipleChoiceQuestion) -> None:
+    def on_survey(self, unit: units.Survey) -> None:
+        """
+        https://edx.readthedocs.io/projects/open-edx-building-and-running-a-course/en/latest/exercises_tools/survey.html
+        """
+        title_attribute = "display_name"
+        unit_type = "poll" if len(unit.questions) < 2 else "survey"
+        attrs = dict()
+        make_dict: t.Callable[
+            [t.List[str]], t.List[t.List[str | t.Dict[str, str]]]
+        ] = lambda x: [
+            [
+                y.lower().replace(" ", "_"),
+                {"img": "", "img_alt": "", "label": y},
+            ]
+            for y in x
+        ]
+        if unit_type == "survey":
+            title_attribute = "block_name"
+            attrs["questions"] = json.dumps(make_dict(unit.questions), indent=4)
+            attrs["answers"] = json.dumps(
+                [[a.lower().replace(" ", "_"), a] for a in unit.answers], indent=4
+            )
+        else:
+            attrs["question"] = unit.questions[0] if unit.questions else ""
+            attrs["answers"] = json.dumps(make_dict(unit.answers), indent=4)
+
+        problem_xml = self.process_single_tag_block(
+            unit=unit, unit_type=unit_type, title_attribute=title_attribute
+        )
+        problem_xml.attrs.update(attrs)
+        problem_xml.attrs["feedback"] = unit.feedback
+
+    def on_freetextquestion(self, unit: units.FreeTextQuestion) -> None:
         """
         https://docs.openedx.org/en/latest/educators/references/course_development/exercise_tools/text_input_xml.html
         """
@@ -181,6 +214,35 @@ class Writer(BaseWriter):
             # Append <type url_name="..."> to that parent (if any)
             if parent_xml := self.unit_xml.get(parent):
                 parent_xml.append(Tag(name=unit_type, attrs={"url_name": url_name}))
+                break
+            parent = parent.parent
+
+        return unit_xml
+
+    def process_single_tag_block(
+        self, unit: units.Unit, unit_type: str, title_attribute: str = "display_name"
+    ) -> Tag:
+        # Get/Generate url_name
+        url_name = get_url_name(unit)
+
+        # <unit_type>/<url_name>.xml
+        display_name = unit.title
+        if not display_name and unit.parent:
+            # Borrow the title from the above unit
+            display_name = unit.parent.title
+        unit_xml = Tag(name=unit_type, attrs={title_attribute: display_name})
+        unit_xml.attrs.update(unit.attributes)
+
+        unit_xml.attrs["url_name"] = url_name
+
+        self.unit_xml[unit] = unit_xml
+
+        # Find the nearest parent for which we have created an xml element
+        parent = unit.parent
+        while parent is not None:
+            # Append <type url_name="..."> to that parent (if any)
+            if parent_xml := self.unit_xml.get(parent):
+                parent_xml.append(unit_xml)
                 break
             parent = parent.parent
 

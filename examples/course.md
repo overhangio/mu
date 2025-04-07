@@ -56,3 +56,37 @@ How many legs does a healthy snake have?
 
 :::
 
+#### Survey
+ 
+::: {mu-type=survey}
+
+#### My Survey {private_results=true max_submissions=10}
+
+Question 1
+
+Question 2
+
+Question 3
+
+* Answer 1
+* Answer 2
+* Answer 3
+
+`This is your feedback text after submitting the survey.`
+
+:::
+
+::: {mu-type=survey}
+
+#### My Poll {private_results=true max_submissions=10}
+
+Can you see this poll example?
+ 
+* Yes
+* No
+* Maybe
+
+`This is your feedback text after submitting the poll.`
+ 
+:::
+
